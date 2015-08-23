@@ -9,6 +9,27 @@ It has an optional type system, and everything is a function, even language cons
 
 Throff is still in development.  The basic language is complete and can be used for minor tasks e.g. text processing.  However things like errors. continuations and someprogrammer-friendly features like arity tracking are still in progress.
 
+## Program direction
+
+Throff programs start at the _bottom_ and are evaluated backwards until they reach the top, where they finish.  Internally, the line breaks are removed and the program becomes one long line, which is evaluated strictly from right-to-left.
+
+
+All Throff functions operate on the result of code to the right of the function.  The only exception is the TOK function, which forces the word to the left to become a TOKEN.
+
+    PRINTLN Hello
+    
+evaluates Hello first (a string), then PRINTLN (a function).  PRINTLN doesn't care how its argument is made, so you can put any code there.
+
+    PRINTLN ADD 1 2
+    
+Throff processes 2, then 1, then ADDs them together, then PRINTLNs them.  If a function doesn't consume any arguments or return any values, it effectively is invisible, and so you can place it anywhere.
+
+    PRINTLN .S ADD 1 2
+    
+will call .S before calling PRINTLN.  .S prints the arguments to its right (i.e. the datastack).  Very handy for debugging!
+
+
+
 ## Goals
 
 * To create a small, simple and portable interpreter (mostly complete)
