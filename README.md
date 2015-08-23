@@ -3,7 +3,7 @@ the Throff programming language
 
     go get -v github.com/donomii/throff
 
-Throff is a dynamically typed, late binding, homoiconic, catenative programming language.  It has all the features of a modern language - closures, lexical scopes, tail call optimisations, and continuations. 
+Throff is a dynamically typed, late binding, homoiconic, concatenative programming language.  It has all the features of a modern language - closures, lexical scopes, tail call optimisations, and continuations. 
 
 It has an optional type system, and everything is a function, even language constructs like IF and FOR, which can be replaced and extended with your own versions.  It uses immutable semantics wherever possible to provide safe and secure threading and continuations.  There is almost no lexer/tokeniser, and no parser in the traditional sense.  Commands are fed directly into the engine to be executed.  The programs are written //backwards//. 
 
@@ -66,6 +66,10 @@ function names etc, while strings are created from TOKENs or directly by reading
 
 Tokens may be forced explicitly with the TOK command, which is the only command in Throff
 that acts on arguments to its _left_.
+
+    Hello! TOK
+    
+will force a token containing Hello! onto the datastack.
 
 Almost everything in throff has a string representation, and wherever possible,
 throff acts on strings and strings alone.  Every datatype except WRAPPER may be
