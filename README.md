@@ -28,7 +28,7 @@ datatypes:
 * String -  ->STRING [ This is a string ]
 * Token - ANY SINGLE WORD LIKE THIS
 * Array - ->ARRAY [ one two three four ] or A[ one two three four ]A 
-* Code - ->FUNC[ PRINTLN Hello ]
+* Code - ->FUNC [ PRINTLN Hello ]
 * Lambda - [ PRINTLN Hello ]
 * Hash - H[ key => value , key => value ]H
 * Wrapper - No literal syntax
@@ -92,7 +92,7 @@ Functions are kept as native arrays, and are created with the [ ] characters.
 Note that because CODE is a datatype, any variable holding a function (that is,
 a CODE) immediately becomes a function, like this:
 
-    DEFINE say_hello = [ PRINTLN Hello ]
+    DEFINE say_hello => [ PRINTLN Hello ]
     SET a = say_hello
     a
 
