@@ -16,17 +16,19 @@ Throff is still in development.  The basic language is complete and can be used 
 * a simple and highly configurable language (good so far)
 * the best interactive debugger, with rewind and undo functionality (promising so far)
 * a familiar interface available everywhere
-
+* to minimise the use of explicit typing where possible
 
 
 ## Throff datatypes
+
+
 Throff datatypes are still a work in progress, as I come to understand the most
 effective ways to structure them.  At the moment, there are the following
-datatypes:
+datatypes, with their literal syntax:
 
 * Boolean - TRUE, FALSE
 * String -  ->STRING [ This is a string ]
-* Token - ANY SINGLE WORD LIKE THIS
+* Token - ANY SINGLE WORD LIKE THIS ,INCLUDING PUNCTUATION [ ] , .
 * Array - ->ARRAY [ one two three four ] or A[ one two three four ]A 
 * Code - ->FUNC [ PRINTLN Hello ]
 * Lambda - [ PRINTLN Hello ]
@@ -37,15 +39,33 @@ Note that under the hood,  arrays, lambdas and codes are all the same thing,
 just with different flags to tell the interpreter what to do when it
 encounters them. 
 
+## String Representations
+
+Throff is homoiconic, which in this case means that all its data structures have explicit string representations.  Every Throff data structure can be used as a string.  So a simple way to compare nested arrays is to compare their string representations:
+
+    EQUAL 	->STRING ARRAY1		->STRING ARRAY2
+    
+hashes should work in a similar manner.
+
+Native wrappers usually will not work this way, since it is not possible to make a string representation for something like a database handle.  Generally they will have a descriptive string that might be unique for some things (like filehandles).
+
+## Symbol Representations
+
+Symbol representations are similar to string representations, but they contain the exact commands needed to recreate the data structure.  The symbol representation is not necessarily homoiconic, instead it is a sequence of commands that, when run by Throff, will recreate the data structure.  This can potentially contain commands to re-open files and network sockets, or do other complex calls.
+
+## The Datatypes in Detail
+
 ### Boolean
 
-Booleans are created with TRUE, FALSE and EQUAL?.  They only matter in an IF statement.
+Booleans are created with TRUE, FALSE and EQUAL.  They only matter in an IF function.
 
 ### Strings and Tokens
 
-Strings and tokens are treated exactly the same, it's just that strings are made
-with the ` ' characters, and tokens are created by the parser, usually for
-function names etc.
+Strings and tokens are treated exactly the same, it's just that tokens are created by the parser, usually for
+function names etc, while strings are created from TOKENs or directly by reading from a socket or file.
+
+Tokens may be forced explicitly with the TOK command, which is the only command in Throff
+that acts on arguments to its _left_.
 
 Almost everything in throff has a string representation, and wherever possible,
 throff acts on strings and strings alone.  Every datatype except WRAPPER may be
@@ -70,7 +90,7 @@ don't contain a WRAPPER have a string representation.  This string is usually
 calculated on-the-fly, so you don't have to worry wasting memory on the string
 component. 
 
-Arrays may converted to LAMBDAs with LAMBDA, and to CODEs with CODE.  If you do
+Arrays may be converted to LAMBDAs with ->LAMBDA or UNFUNC, and to CODEs with ->CODE.  If you do
 this, the newly formed function will run in the same namespace that it was
 defined in.  You can change the environment it runs in with SETENVIRONMENT.
 
