@@ -20,6 +20,7 @@ func main () {
 			log.Println(http.ListenAndServe("localhost:6060", nil))
 	}()
 	t := throfflib.MakeEngine()
+	t = throfflib.LoadGraphics(t)
 	strs := os.Args[1:]
 	//t = t.RunFile("bootstrapgo.lib")
 	t = t.RunString(bootStrapString(), "Internal Bootstrap")
