@@ -488,7 +488,9 @@ LN number
 ### Array functions
 
 NEWARRAY
-	Create a new array
+	Create a new array or use the literal
+	
+	A[ 1 2 3 4 ]A
 	
 ARRAYPUSH array item
 	
@@ -526,5 +528,53 @@ GETARRAY index array
 	
 	BIND 3rdItem => GETARRAY 2 myArray
 	
+### HASHes (dictionaries)
+
+NEWHASH
+	Create a new hash, or use the literal
 	
+	H[ key value key value ]H
 	
+HASHSET hash key value
+
+	Sets __key__ to __value__
+	
+	Returns
+		a new hash.  The old hash is unmodified
+	
+SETHASH key value hash
+
+	Sets __key__ to __value__
+	
+	Returns
+		a new hash.  The old hash is unmodified
+
+KEYS hash
+
+	Returns 
+		array	the keys of the hash as an array
+VALUES hash
+
+	Returns
+		array	The values of the hash, as an array
+
+KEYVALS
+
+	Returns
+		array	The keys and values "flattened" into an array
+		
+	Example
+	
+	KEYVALS H[ A 1 B 2 C 3 ]H
+	
+	-> A[ A 1 B 2 C 3 ]A
+	
+KEYS/VALS
+
+	Returns
+		array	KEYS hash
+		array	VALUES hash
+
+HASHDELETE hash key
+
+	Removes __key__ from the hash
