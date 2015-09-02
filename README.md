@@ -202,13 +202,15 @@ string representation will behave correctly.
 
 ## Function Reference
 
-THIN function
+#### THIN function
+	
 	THIN converts a function into a THIN function, which has no lexical environment - it shares its parents' lexical scope
 
-MACRO
+#### MACRO function
+	
 	MACRO converts a function into a MACRO.  MACROs have no lexical environment - they use the same environment as the caller (dynamic scope).
 
-	WITH array FROM hash
+#### WITH array FROM hash
 
 	Inserts hashkeys into the current namespace
 	
@@ -231,7 +233,7 @@ MACRO
 	DEFINE dates => GETHASH dates http_requests
 	DEFINE paths => GETHASH paths http_requests
 	
-REPEAT n function
+#### REPEAT n function
 
 	Calls the function n times.  
 	
@@ -245,7 +247,7 @@ REPEAT n function
 	
 	<MAP>, <FOLD>, <RANGE>
 	
-THREAD function
+#### THREAD function
 
 	Starts a new thread to run function.  A clone of the current interpreter is used for the the new thread.  Due to Throff's immutable semantics, the new thread will not be able to update values in the old thread.  However this protection does not work for outside connections or libraries.  If both the old and new threads attempt to write to the same file handle, or read from the same network socket, corruption will occur.
 	
@@ -257,7 +259,7 @@ THREAD function
 
 
 
-DEFINE name => value
+#### DEFINE name => value
 
 	Sets the variable name to value
 	
@@ -302,7 +304,7 @@ DEFINE name => value
 	<BIND>,<REBIND>,<TOK>, <GETFUNCTION>, <ARG>, <CALL>->LAMBDA
 
 
-ARG name =>
+#### ARG name =>
 
 	ARG binds an argument to a name.  It is currently an alias to BIND.  Please read the notes on BIND to understand how to use ARG.
 	
@@ -322,7 +324,7 @@ ARG name =>
 	
 	<DEFINE>,<BIND>,<REBIND>
 
-BIND name => value
+#### BIND name => value
 	
 	Variables are created with the BIND command. 
 
@@ -334,7 +336,7 @@ BIND name => value
 	 
 	Bindings are almost immutable - you can only modify bindings in your current scope.  Read the Scoping section for more details.
 
-REBIND name => new value
+#### REBIND name => new value
 
 	Overwrites an existing binding
 	
@@ -349,7 +351,7 @@ REBIND name => new value
 	Note that no matter what happens, the change is only visible inside the current scope.
 
 
-TOK
+#### TOK
 
 	TOK quotes the word to its left
 	
@@ -385,11 +387,11 @@ TOK
 	
 	<GETFUNCTION>
 
-CALL function
+#### CALL function
 
 	Calls a function or a lambda
 	
-	Call activates a function, which you would typically get from GETFUNCTION
+	Call activates a function, which are built with [ ] or fetched with GETFUNCTION
 
 	Example:
 	
@@ -404,7 +406,7 @@ CALL function
 	
 	<GETFUNCTION>
 	
-->LAMBDA
+#### ->LAMBDA
 	
 	Converts a CODE or ARRAY into a LAMBDA
 	
@@ -424,13 +426,13 @@ CALL function
 	
 	<GETFUNCTION>
 
-->STRING
+#### ->STRING
 
 	Converts anything into a STRING.
 	
 	In Throff, almost everything has a string representation.  The only exceptions are WRAPPERs around internal data structures, and where possible, these will have some kind of descriptive string.  ->STRING will extract the string representation of any native data structure recursively, so calling it on a HASH or ARRAY might result in a very large string.
 	
-->ARRAY
+#### ->ARRAY
 
 	Converts a CODE or LAMBDA into an ARRAY
 	
@@ -443,7 +445,7 @@ CALL function
 
 ### Math Functions
 
-ADD number number
+#### ADD number number
 
 	Adds two numbers
 
@@ -451,35 +453,40 @@ ADD number number
 	
 	ADD 2 3
 	
-SUB number number
+#### SUB number number
+	
 	Subtract two numbers
 	
 	Example
 	
 	SUB 5 3
 	
-MULT number number
+#### MULT number number
+	
 	Multiplies two numbers
 	
 	Example
 	
 	MULT 3 4
 	
-DIVIDE number number
+#### DIVIDE number number
+	
 	Divides two numbers
 	
 	Example
 	
 	DIVIDE 10 9
 	
-MODULO number number
+#### MODULO number number
+	
 	Returns a modulo b
 	
 	Example
 	
 	MODULO 100000 3
 	
-LN number
+#### LN number
+	
 	Natural logarithm
 	
 	
@@ -487,12 +494,13 @@ LN number
 
 ### Array functions
 
-NEWARRAY
+#### NEWARRAY
+	
 	Create a new array or use the literal
 	
 	A[ 1 2 3 4 ]A
 	
-ARRAYPUSH array item
+#### ARRAYPUSH array item
 	
 	Pushes item onto the end of array.  Returns the new array
 	
@@ -500,7 +508,8 @@ ARRAYPUSH array item
 	
 	REBIND myArray => ARRAYPUSH myArray [ hello ]
 	
-POPARRAY array
+#### POPARRAY array
+	
 	Pops an item off the end of the array
 	
 	Returns
@@ -515,13 +524,16 @@ POPARRAY array
 	
 	POPARRAY returns two values: the item from the end of the array, and a new array, missing the final item. The original array is not affected!
 	
-SHIFTARRAY array
+#### SHIFTARRAY array
+	
 	As for POPARRAY, but the other end
 	
-UNSHIFTARRAY item array
+#### UNSHIFTARRAY item array
+	
 	As for pusharray, but the other end
 	
-GETARRAY index array
+#### GETARRAY index array
+	
 	Returns the item in array at position index
 	
 	Example
@@ -530,35 +542,36 @@ GETARRAY index array
 	
 ### HASHes (dictionaries)
 
-NEWHASH
+#### NEWHASH
+	
 	Create a new hash, or use the literal
 	
 	H[ key value key value ]H
 	
-HASHSET hash key value
+#### HASHSET hash key value
 
 	Sets __key__ to __value__
 	
 	Returns
 		a new hash.  The old hash is unmodified
 	
-SETHASH key value hash
+#### SETHASH key value hash
 
 	Sets __key__ to __value__
 	
 	Returns
 		a new hash.  The old hash is unmodified
 
-KEYS hash
+#### KEYS hash
 
 	Returns 
 		array	the keys of the hash as an array
-VALUES hash
+#### VALUES hash
 
 	Returns
 		array	The values of the hash, as an array
 
-KEYVALS
+#### KEYVALS
 
 	Returns
 		array	The keys and values "flattened" into an array
@@ -569,12 +582,12 @@ KEYVALS
 	
 	-> A[ A 1 B 2 C 3 ]A
 	
-KEYS/VALS
+#### KEYS/VALS
 
 	Returns
 		array	KEYS hash
 		array	VALUES hash
 
-HASHDELETE hash key
+#### HASHDELETE hash key
 
 	Removes *key* from the hash
