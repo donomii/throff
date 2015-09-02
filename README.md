@@ -553,28 +553,28 @@ string representation will behave correctly.
 	Sets __key__ to __value__
 	
 	Returns
-		a new hash.  The old hash is unmodified
+		hash	- a new hash.  The old hash is unmodified
 	
 #### SETHASH key value hash
 
 	Sets __key__ to __value__
 	
 	Returns
-		a new hash.  The old hash is unmodified
+		hash	- a new hash.  The old hash is unmodified
 
 #### KEYS hash
 
 	Returns 
-		array	the keys of the hash as an array
+		array	- the keys of the hash as an array
 #### VALUES hash
 
 	Returns
-		array	The values of the hash, as an array
+		array	- The values of the hash, as an array
 
 #### KEYVALS
 
 	Returns
-		array	The keys and values "flattened" into an array
+		array	- The keys and values "flattened" into an array
 		
 	Example
 	
@@ -591,3 +591,33 @@ string representation will behave correctly.
 #### HASHDELETE hash key
 
 	Removes *key* from the hash
+	
+### Queues
+
+Queues are thread safe FIFO queues, most useful for sending messages between threads.  All throff data types can be send through a queue, and since this will simply send a pointer, it is quick and efficient.
+
+Note that queues are mutable, so they will disable most optimisations for the scope that they are used in.  However
+
+#### NEWQUEUE
+
+	Create a new thread-safe FIFO queue
+	
+#### WRITEQ queue value
+
+	Sends value to queue
+	
+#### READQ queue
+
+	Reads a value from queue
+
+	Returns
+		value	- a single element from the queue
+		
+### Network
+
+#### DNS.HOST hostname
+
+	Lookup hostname in the DNS system
+	
+	Returns
+		array	- IP addresses
