@@ -577,4 +577,4 @@ KEYS/VALS
 
 HASHDELETE hash key
 
-	Removes __key__ from the hash
+	Removes **key** from the hash
