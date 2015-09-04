@@ -3,7 +3,7 @@ the Throff programming language
 
     go get -v github.com/donomii/throff
 
-Throff is a dynamically typed, late binding, homoiconic, concatenative programming language.  It has all the features of a modern language - closures, lexical scopes, tail call optimisations, and continuations. 
+Throff is a dynamically typed, late binding, homoiconic, concatenative programming language.  It has all the features of a modern language - [closures, lexical scopes](http://praeceptamachinae.com/post/throff_variables.html), tail call optimisations, and continuations. 
 
 It has an optional type system, and everything is a function, even language constructs like IF and FOR, which can be replaced and extended with your own versions.  It uses immutable semantics wherever possible to provide safe and secure threading and continuations.  There is almost no lexer/tokeniser, and no parser in the traditional sense.  Commands are fed directly into the engine to be executed.  The programs are written //backwards//. 
 
@@ -137,9 +137,9 @@ Functions are kept as native arrays, and are created with the [ ] characters.
 Note that because CODE is a datatype, any variable holding a function (that is,
 a CODE) immediately becomes a function, like this:
 
+	a
+	BIND a => say_hello
     DEFINE say_hello => [ PRINTLN Hello ]
-    SET a = say_hello
-    a
 
 will output
 
@@ -204,30 +204,32 @@ string representation will behave correctly.
 
 #### THIN function
 	
-	THIN converts a function into a THIN function, which has no lexical environment - it shares its parents' lexical scope
+THIN converts a function into a THIN function, which has no lexical environment - it shares its parents' lexical scope
 
 #### MACRO function
 	
-	MACRO converts a function into a MACRO.  MACROs have no lexical environment - they use the same environment as the caller (dynamic scope).
+MACRO converts a function into a MACRO.  MACROs have no lexical environment - they use the same environment as the caller (dynamic scope).
 
 #### WITH array FROM hash
 
-	Inserts hashkeys into the current namespace
+Inserts hashkeys into the current namespace
 	
 	WITH [ a b c ] FROM H[ a 1 b 2 c 3 ]H
 
-	Loads the requested keys from the hash and puts them in the current environment.  
+Loads the requested keys from the hash and puts them in the current environment.  
 	
-	Updating the variables will not update the hash nor vice versa.
+Updating the variables will not update the hash nor vice versa.
 
-	Parameters: 
+##### Parameters: 
 	
-	array 	- A list of hash keys that will become variable names
-	hash		- Some data that you want to access as variables
+-	array 	- A list of hash keys that will become variable names
+-	hash	- Some data that you want to access as variables
 
-	Example: WITH [ ips dates paths ] FROM http_requests
+	Example: 
 	
-	is equivalent to 
+	WITH [ ips dates paths ] FROM http_requests
+	
+is equivalent to 
 	
 	DEFINE ips 	=> GETHASH ips http_requests
 	DEFINE dates => GETHASH dates http_requests
@@ -235,27 +237,31 @@ string representation will behave correctly.
 	
 #### REPEAT n function
 
-	Calls the function n times.  
+Calls the function n times.  
 	
-	Parameters:
+##### Parameters:
 	
-	function	- The function must take no arguments and return no values (i.e. it is called for its side effects)
+-	function	- The function must take no arguments and return no values (i.e. it is called for its side effects)
 	
-	Example: REPEAT 10 [ p Hello World ; ]
+	Example: 
 	
-	See Also:
+	REPEAT 10 [ p Hello World ; ]
+	
+##### See Also:
 	
 	<MAP>, <FOLD>, <RANGE>
 	
 #### THREAD function
 
-	Starts a new thread to run function.  A clone of the current interpreter is used for the the new thread.  Due to Throff's immutable semantics, the new thread will not be able to update values in the old thread.  However this protection does not work for outside connections or libraries.  If both the old and new threads attempt to write to the same file handle, or read from the same network socket, corruption will occur.
+Starts a new thread to run function.  A clone of the current interpreter is used for the the new thread.  Due to Throff's immutable semantics, the new thread will not be able to update values in the old thread.  However this protection does not work for outside connections or libraries.  If both the old and new threads attempt to write to the same file handle, or read from the same network socket, corruption will occur.
 	
-	Parameters:
+Parameters:
 	
-	function 	- The function to run in the new thread.  It must take no arguments and return no values
+-	function 	- The function to run in the new thread.  It must take no arguments and return no values
 	
-	Example: THREAD [ p Hello World ; ]
+	Example: 
+	
+	THREAD [ p Hello World ; ]
 
 
 
