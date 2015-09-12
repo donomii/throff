@@ -3,7 +3,7 @@ the Throff programming language
 
     go get -v github.com/donomii/throff
 
-Throff is a dynamically typed, late binding, homoiconic, concatenative programming language.  It has all the features of a modern language - [closures, lexical scopes](http://praeceptamachinae.com/post/throff_variables.html), tail call optimisations, and continuations. 
+Throff is a dynamically typed, late binding, homoiconic, concatenative programming language.  It has all the features of a modern language - [closures, lexical scopes](http://praeceptamachinae.com/post/throff_variables.html), [tail call optimisations](http://praeceptamachinae.com/post/throff_tail_call_optimisation.html), and continuations. 
 
 It has an optional type system, and everything is a function, even language constructs like IF and FOR, which can be replaced and extended with your own versions.  It uses immutable semantics wherever possible to provide safe and secure threading and continuations.  There is almost no lexer/tokeniser, and no parser in the traditional sense.  Commands are fed directly into the engine to be executed.  The programs are written //backwards//. 
 
@@ -255,7 +255,7 @@ Calls the function n times.
 
 Starts a new thread to run function.  A clone of the current interpreter is used for the the new thread.  Due to Throff's immutable semantics, the new thread will not be able to update values in the old thread.  However this protection does not work for outside connections or libraries.  If both the old and new threads attempt to write to the same file handle, or read from the same network socket, corruption will occur.
 	
-Parameters:
+##### Parameters:
 	
 -	function 	- The function to run in the new thread.  It must take no arguments and return no values
 	
@@ -267,19 +267,19 @@ Parameters:
 
 #### DEFINE name => value
 
-	Sets the variable name to value
+Sets the variable name to value
 	
 	
-	Parameters:
+##### Parameters:
 	
-	name	- A variable name that will be bound in the current namespace.
-	value	- Any value or function 
+- name	- A variable name that will be bound in the current namespace.
+- value	- Any value or function 
 	
-	Description:
+##### Description:
 	
-	DEFINE sets a variable.  name does not need to be quoted, so long as you remember to put the => operator afterwards.  
+DEFINE sets a variable.  name does not need to be quoted, so long as you remember to put the => operator afterwards.  
 	
-	value  function definition must be a function definition (LAMBDA or CODE), and name will become a function.  Any time name appears in the program, it will automatically activate.  This can cause some nasty bugs, for example:
+**value**  must be a function definition (LAMBDA or CODE), and **name** will become a function.  Any time name appears in the program, it will automatically activate.  This can cause some nasty bugs, for example:
 	
 	DEFINE print_code => [
 		p Code is aFunc ;
@@ -287,19 +287,19 @@ Parameters:
 		ARG aFunc =>
 	]
 	
-	if you pass a function, you will get, at best, a crash
+if you use print_code on a function, you will get, at best, a crash
 	
 	print_code ->FUNC [ ADD ]
 	
 	> ERROR: read on empty stack
 	
-	Instead of printing out ADD, the program crashes because the variable aFunc became a function that tries to add the next two arguments, in this case, the letter ';' and the top of the stack.  To avoid this mishap, you will need to typecast the arguments to your function:
+Instead of printing out ADD, the program crashes because the variable aFunc became a function that tries to add the next two arguments, in this case, the letter ';' and the top of the stack.  To avoid this mishap, you will need to typecast the arguments to your function:
 	
 	ARG aFunc => ->LAMBDA
 	ARG aFunc => ->STRING
 	ARG aFunc => ->ARRAY
 	
-	or you can use GETFUNCTION to safely get the value of aFunc
+or you can use GETFUNCTION to safely get the value of aFunc
 	
 	GETFUNCTION aFunc TOK
 
@@ -627,3 +627,26 @@ Note that queues are mutable, so they will disable most optimisations for the sc
 	
 	Returns
 		array	- IP addresses
+		
+### Advanced control flow
+
+#### CALL/CC function
+
+Call **function** with the Current Continuation.  **function** must take one argument
+
+Returns
+
+- Nothing - CALL/CC never returns
+ 
+#### ACTIVATE/CC continuation value
+
+Activate **continuation** with **value**.  Control will jump to the place where the continuation was defined.
+
+Returns
+
+- Nothing.  ACTIVATE/CC never returns
+
+
+
+	
+
