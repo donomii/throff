@@ -646,6 +646,55 @@ Returns
 
 - Nothing.  ACTIVATE/CC never returns
 
+### Actors
+
+Actors are objects that run in their own thread.  Actors receive commands via input queues, and return results over an output queue.  Actors are asynchronous, and are best when used for slow-running code that can run in the background.
+
+A good use of actors is networking code, e.g. fetching webpages, or communicating with a database.
+
+Actors should not be used for small, fast code e.g. numerical code.  Do not, for instance, make an actor that squares a number and returns it.
+
+Each message to an actor requires several rounds of locking and hash accesses, so it works better when wrapping slower code.
+
+#### ACTOR lambda
+
+Create a new actor. **lambda** will be called for each message sent to the actor.  **lambda** must take one argument and return one value, which will be written to the output queue.
+
+Actors run in their own thread so they are a great place to put code that will block or run slowly.
+
+Returns
+
+- An actor.  You can send messages to it with CALLA
+
+See Also
+
+<CALLA>
+
+#### CALLA actor value
+
+CALLA sends a **value** to an **actor**.  Value can be anything e.g. array, hash, wrapper, etc.
+
+CALLA returns a PROMISE.  A PROMISE is function that has not yet computed its value.  The first time it is used, it attempts to calculate its value.  In this case, it will attempt to read a return message from an actor.
+
+If the actor has finished its calculation and returned a value, then the PROMISE will return immediately with the value.  If the actor has not sent a return value, then the code that is accessing the PROMISE will block until the actor sends a message.
+
+The return value is cached and further accesses will be instant.
+
+Example
+
+PRINTLN VALUE
+BIND VALUE => CALLA DOUBLE
+BIND DOUBLE => ACTOR [ MULT 2 ]
+
+Returns
+
+- a PROMISE.  This is (or will be), the return from the actor
+
+See Also
+
+<ACTOR>, <PROMISE>
+
+
 
 
 	

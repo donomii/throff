@@ -48,6 +48,49 @@ func bootStrapString( ) string {
 	
 	TESTBLOCK [ PRINTLN [ Bootstrap complete, ready for commands ] ] 
 
+DEFINE CALLA => [
+        ->FUNC [
+                VAL
+                WHEN NOT DONE
+                        THIN [
+                                REBIND VAL => READQ RQ
+                                REBIND DONE => TRUE
+                        ]
+        ]
+        WRITEQ AC H[ FARG => URL RET => RQ ]H
+        BIND RQ => NEWQUEUE
+        BIND DONE => FALSE
+        BIND VAL => FALSE
+        BIND URL =>
+        BIND AC =>
+]
+
+DEFINE ACTOR => [
+        WQ
+        THREAD [
+                FOREVER [ WRITEQ RETQ CALL USERFUNC  FARG
+                BIND RETQ => GETHASH RET => PARAMS
+                BIND FARG => GETHASH FARG => PARAMS
+                BIND PARAMS => READQ WQ
+                ]
+        ]
+        BIND WQ NEWQUEUE
+        BIND USERFUNC =>
+]
+
+
+DEFINE MIME => [
+        ->FUNC [ WRITEQ Q ]
+        THREAD [
+                FOREVER [ CALL USERFUNC  READQ Q ]
+        ]
+        BIND Q NEWQUEUE
+        BIND USERFUNC =>
+]
+
+DEFINE FOREVER => [ FOREVER CALL DUP ]
+
+
 TESTBLOCK [
 
 TEST  wonkyA   1  [ WITH STATEMENT ]
