@@ -646,6 +646,32 @@ Returns
 
 - Nothing.  ACTIVATE/CC never returns
 
+#### PROMISE lambda 
+
+A PROMISE is a function that delays its execution until needed.  It's a way to get some of the benefits of a lazy language without actually having a lazy language.
+
+**lambda** must return one value, and take no imputs.
+
+When a promise is created, it delays the execution of **lambda** until the first time that the promise is accessed - usually via its variable name.  e.g.
+
+    PRINTLN GREETING
+    PROMISE [ HELLO ]
+
+Promises are most useful when they are used on code that is expensive to run, like database or network calls.  So for instance, instead of loading data from the database for all employees and putting it into an array, you can fill the array with PROMISES which will fetch the data when accessed.
+
+After the **lambda** runs, its return value is cached, and the **lambda** is not called again.  **lambda** is only ever called once.
+
+
+Note
+
+Promises are easy to trigger accidentally by passing them to a function that accesses them.  For instance, calling MAP on an array of PROMISEs will activate every PROMISE in the array, because MAP takes each element from the input array and "accesses" it while calling the map function.
+
+Example
+
+    MAP [ PROMISE [ database-fetch USER ] ARG USER => ] [ BOB MARY SUE DAVE ]
+
+Returns
+- A PROMISE.  
 ### Actors
 
 Actors are objects that run in their own thread.  Actors receive commands via input queues, and return results over an output queue.  Actors are asynchronous, and are best when used for slow-running code that can run in the background.

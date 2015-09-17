@@ -48,6 +48,19 @@ func bootStrapString( ) string {
 	
 	TESTBLOCK [ PRINTLN [ Bootstrap complete, ready for commands ] ] 
 
+DEFINE PROMISE => [
+        ->FUNC [
+                VAL
+                WHEN NOT DONE
+                        THIN [
+				REBIND F => FALSE
+                                REBIND VAL => F
+                                REBIND DONE => TRUE
+                        ]
+        ]
+	ARG F =>
+]
+
 DEFINE CALLA => [
         ->FUNC [
                 VAL
