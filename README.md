@@ -495,8 +495,35 @@ or you can use GETFUNCTION to safely get the value of aFunc
 	
 	Natural logarithm
 	
+### String functions
+
+#### STRING-CONCATENTE s1 s2
+
+Returns a new string, which is s1 with s2 appended
+
+#### STRING-CONCATENTE* array
+
+Returns a new string, which is all the elements of **array** concatenated together.
+
+#### STRING-JOIN string array
+
+Returns a new string, which is made of all the elements of **array** with **string** in between each element
+
+Example
+
+    STRING-JOIN , A[ HELLO WORLD ]A
+    
+    > HELLO,WORLD
 	
-	
+#### PL number string
+
+Pluralises **string** by adding an s to the end if **number** is not equal to one.
+
+Example
+
+    PRINLN A[ 99 PL 99 bottle of beer ]A
+    
+    > 99 bottles of beer
 
 ### Array functions
 
@@ -546,6 +573,26 @@ or you can use GETFUNCTION to safely get the value of aFunc
 	
 	BIND 3rdItem => GETARRAY 2 myArray
 	
+#### EMPTY? array
+
+Returns true if **array** has no elements.
+	
+#### REVERSE array
+
+    Returns a reversed copy of **array**
+    
+#### CAR array
+
+Returns the first element of **array**
+
+#### CDR array
+
+Returns a copy of **array**, with the first element removed
+#### APPEND array1 array2
+
+Returns a new array which is array1 with array2 appended to the end.
+
+
 ### HASHes (dictionaries)
 
 #### NEWHASH
@@ -630,6 +677,35 @@ Note that queues are mutable, so they will disable most optimisations for the sc
 		
 ### Advanced control flow
 
+#### CASE array
+
+Much neater than multiple if statements, CASE provides a compact way to do multiple tests, in order.
+
+Example
+
+    CASE A[
+         LESSTHAN 0 X       ... [ PRINTLN [ X IS GREATER THAN 0 ] ]
+         LESSTHAN X 0       ... [ PRINTLN [ X IS LESS THAN 0 ] ]
+         DEFAULT            ... [ PRINTLN [ X IS EQUAL TO 0 ] ]
+     ]A
+
+Case tests each condition (on the left).  If that condition is true, it calls the function on the right.  CASE is an expression, the result of the function is the result of the CASE.
+
+    REBIND COUNT ADD COUNT CASE A[
+         LESSTHAN 0 X       ... -1
+         LESSTHAN X 0       ... 1
+         DEFAULT            ... 0
+     ]A
+    
+You can provide a function or a value, CASE will use CALL to resolve everything.
+
+    REBIND COUNT ADD COUNT CASE A[
+         [ LESSTHAN 0 X ]       ... [ -1 ]
+         [ LESSTHAN X 0 ]       ... [  1 ]
+         [ DEFAULT      ]       ... [  0 ]
+     ]A
+
+
 #### CALL/CC function
 
 Call **function** with the Current Continuation.  **function** must take one argument
@@ -655,7 +731,7 @@ A PROMISE is a function that delays its execution until needed.  It's a way to g
 When a promise is created, it delays the execution of **lambda** until the first time that the promise is accessed - usually via its variable name.  e.g.
 
     PRINTLN GREETING
-    PROMISE [ HELLO ]
+    BIND GREETING => PROMISE [ HELLO ]
 
 Promises are most useful when they are used on code that is expensive to run, like database or network calls.  So for instance, instead of loading data from the database for all employees and putting it into an array, you can fill the array with PROMISES which will fetch the data when accessed.
 
@@ -666,12 +742,24 @@ Note
 
 Promises are easy to trigger accidentally by passing them to a function that accesses them.  For instance, calling MAP on an array of PROMISEs will activate every PROMISE in the array, because MAP takes each element from the input array and "accesses" it while calling the map function.
 
+Note
+
+Promises are easy to NOT trigger accidentally.  Because a promise is just a function, it has to be used like a function to work.  If you never assign it to a variable and then use it, the function won't run.  e.g.
+
+   PRINTLN PROMISE [ HELLO ]
+   
+does not print HELLO, it prints [ FUNCTION DEFINITION ].  You actually need
+
+   PRINTLN CALL PROMISE [ HELLO ] 
+
 Example
 
     MAP [ PROMISE [ database-fetch USER ] ARG USER => ] [ BOB MARY SUE DAVE ]
 
 Returns
 - A PROMISE.  
+
+
 ### Actors
 
 Actors are objects that run in their own thread.  Actors receive commands via input queues, and return results over an output queue.  Actors are asynchronous, and are best when used for slow-running code that can run in the background.
