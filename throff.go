@@ -48,6 +48,30 @@ func bootStrapString( ) string {
 	
 	TESTBLOCK [ PRINTLN [ Bootstrap complete, ready for commands ] ] 
 
+DEFINE THROW => [
+    ACTIVATE/CC ERRORHANDLER A[ TRUE  MSG ]A 
+    ARG MSG => 
+]
+
+DEFINE CATCH => [
+    IF HANDLER [
+        CALL ERRLAMBDA MSG·
+    ] [ ]
+
+    BIND MSG => CAR CDR RET
+    BIND HANDLER => CAR RET
+    BIND RET => 
+    PRINTLN DUP
+    PRINTLN [ BAck in catch ]
+    CALL/CC [
+        INSTALLDYNA CC ->FUNC  [ A[ FALSE AAAA AAAA  ]A CALL ALAMBDA ]
+        ARG CC => 
+    ]  
+    ARG ALAMBDA => 
+    ARG ERRLAMBDA => 
+]
+
+
 BIND DEFAULT => TRUE
 
 DEFINE CASE => [
@@ -1182,11 +1206,13 @@ DEFINE WHEN => [
 		: VAL TOK  
 ]
 
-DEFINE ERROR => [ CALL/CC [ ERRORHANDLER ] PRINTLN ]
+COMMENT [
+    DEFINE ERROR => [ CALL/CC [ ERRORHANDLER ] PRINTLN ]
 
 DEFINE ERRORHANDLER => [ 
 	INTERPRET 
 	PRINTLN [ An error has occurred, dropping you to the debugger ]
+]
 ]
 
 TESTBLOCK [
@@ -1507,13 +1533,13 @@ COMMENT [ BASIC FUNCTIONS DEFINED! ]
 COMMENT [ LOADING STANDARD LIBRARY .... ]
 : COMMENT TOK ->FUNC [ DROP ]
 : ->FUNC TOK SETTYPE CODE TOK [ SETTYPE CODE TOK ]
-: RUNTESTS FALSE
 : FALSE TOK EQUAL 0 1 
 : TRUE TOK EQUAL 1 1 
  
 
 
 
+: RUNTESTS TRUE
 
 
 ITROFF
