@@ -705,6 +705,31 @@ You can provide a function or a value, CASE will use CALL to resolve everything.
          [ DEFAULT      ]       ... [  0 ]
      ]A
 
+#### CATCH [ error handler ] [ function ]
+
+CATCH calls **function**.  If **function** THROWs an error, thene the **error handler** will be run.  **error hander** must take one argument, which will be the THROWn error message
+
+Returns
+
+The result of **function**, or the result of the **error handler**
+
+See Also
+
+<THROW>
+
+#### THROW message
+
+THROW causes an error condition, which will be caught by the previously declared **error handler**, as declared by **CATCH**
+
+**message** can be any value
+
+Returns
+
+THROW does not return
+
+See Also
+
+<CATCH>
 
 #### CALL/CC function
 
