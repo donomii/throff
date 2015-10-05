@@ -55,20 +55,18 @@ DEFINE THROW => [
 
 DEFINE CATCH => [
     IF HANDLER [
-        CALL ERRLAMBDA MSG·
+        CALL ERRLAMBDA MSG
     ] [ ]
 
     BIND MSG => CAR CDR RET
     BIND HANDLER => CAR RET
     BIND RET => 
-    PRINTLN DUP
-    PRINTLN [ BAck in catch ]
     CALL/CC [
         INSTALLDYNA CC ->FUNC  [ A[ FALSE AAAA AAAA  ]A CALL ALAMBDA ]
-        ARG CC => 
-    ]  
-    ARG ALAMBDA => 
-    ARG ERRLAMBDA => 
+        ARG CC =>
+    ]
+    ARG ALAMBDA =>
+    ARG ERRLAMBDA =>
 ]
 
 
