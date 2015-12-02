@@ -254,7 +254,7 @@ Calls **function** n times.
 
 ##### See Also:
 
-	<MAP>, <FOLD>, <RANGE>
+	MAP, FOLD, RANGE
 
 #### THREAD function
 
@@ -312,7 +312,7 @@ or you can use GETFUNCTION to safely get the value of aFunc
 
 	See Also:
 
-	<BIND>,<REBIND>,<TOK>, <GETFUNCTION>, <ARG>, <CALL>->LAMBDA
+	BIND, REBIND, TOK, GETFUNCTION, ARG, CALL, ->LAMBDA
 
 
 #### ARG name =>
@@ -333,7 +333,7 @@ or you can use GETFUNCTION to safely get the value of aFunc
 
 	See Also:
 
-	<DEFINE>,<BIND>,<REBIND>
+	DEFINE, BIND, REBIND
 
 #### BIND name => value
 
@@ -398,7 +398,7 @@ or you can use GETFUNCTION to safely get the value of aFunc
 
 	See Also:
 
-	<GETFUNCTION>
+	GETFUNCTION
 
 #### CALL function
 
@@ -417,7 +417,7 @@ or you can use GETFUNCTION to safely get the value of aFunc
 
 	See Also:
 
-	<GETFUNCTION>
+	GETFUNCTION
 
 #### ->LAMBDA
 
@@ -440,7 +440,7 @@ FIXME move this discussion to another page
 
 	See Also:
 
-	<GETFUNCTION>
+	GETFUNCTION
 
 #### ->STRING
 
@@ -752,7 +752,7 @@ The result of **function**, or the result of the **error handler**
 
 See Also
 
-<THROW>
+THROW
 
 #### THROW message
 
@@ -766,7 +766,7 @@ THROW does not return
 
 See Also
 
-<CATCH>
+CATCH
 
 #### CALL/CC lambda
 
@@ -844,7 +844,7 @@ Returns
 
 See Also
 
-<CALLA>
+CALLA
 
 #### CALLA actor value
 
@@ -868,4 +868,4 @@ Returns
 
 See Also
 
-<ACTOR>, <PROMISE>
+ACTOR, PROMISE
