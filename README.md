@@ -5,7 +5,7 @@ the Throff programming language
 
 Throff is a dynamically typed, late binding, homoiconic, concatenative programming language.  It has all the features of a modern language - [closures, lexical scopes](http://praeceptamachinae.com/post/throff_variables.html), [tail call optimisations](http://praeceptamachinae.com/post/throff_tail_call_optimisation.html), and continuations.
 
-It has an optional type system, and everything is a function, even language constructs like IF and FOR, which can be replaced and extended with your own versions.  It uses immutable semantics wherever possible to provide safe and secure threading and continuations.  There is almost no lexer/tokeniser, and no parser in the traditional sense.  Commands are fed directly into the engine to be executed.  The programs are written //backwards//.
+It has an optional type system, and everything is a function, even language constructs like IF and FOR, which can be replaced and extended with your own versions.  It uses immutable semantics wherever possible to provide safe and secure threading and continuations.  There is almost no lexer/tokeniser, and no parser in the traditional sense.  Commands are fed directly into the engine to be executed.  The programs are written _backwards_.
 
 Throff is still in development.  The basic language is complete and can be used for minor tasks e.g. text processing.  However things like errors. continuations and someprogrammer-friendly features like arity tracking are still in progress.
 
@@ -14,11 +14,11 @@ Throff is still in development.  The basic language is complete and can be used 
 Throff programs start at the _bottom_ and are evaluated backwards until they reach the top, where they finish.  Actually, the line breaks are removed and the program becomes one long line, which is evaluated from right-to-left.
 
 
-All Throff functions operate on the result of code to the right of the function.  The only exception is the TOK function, which forces the word to the left to become a TOKEN.
+All Throff functions operate on the result of code to the right of the function.
 
     PRINTLN Hello
 
-evaluates Hello first (a string), then PRINTLN (a function).  PRINTLN doesn't care how its argument is made, so you can put any code there.
+evaluates Hello (a string), then PRINTLN (a function).  PRINTLN doesn't care how its argument is made, so you can put any code there.
 
     PRINTLN ADD 1 2
 
@@ -47,18 +47,17 @@ will call .S before calling PRINTLN.  .S prints the arguments to its right (i.e.
 Throff datatypes are still a work in progress, as I come to understand the most effective ways to structure them.  At the moment, there are the following
 datatypes, with their literal syntax:
 
-* Boolean - TRUE, FALSE
-* String -  ->STRING [ This is a string ]
-* Token - ANY SINGLE WORD LIKE THIS, INCLUDING PUNCTUATION [ ] , .
-* Array - ->ARRAY [ one two three four ] or A[ one two three four ]A
-* Code - ->FUNC [ PRINTLN Hello ]
-* Lambda - [ PRINTLN Hello ]
-* Hash - H[ key => value  key => value ]H
-* Wrapper - No literal syntax
-* Bytes - No literal syntax
+* Boolean -     TRUE, FALSE
+* String -      ->STRING [ This is a string ]
+* Token -       ANY SINGLE WORD LIKE THIS, INCLUDING PUNCTUATION [ ] , .
+* Array -       ->ARRAY [ one two three four ] or A[ one two three four ]A
+* Code -        ->FUNC [ PRINTLN Hello ]
+* Lambda -      [ PRINTLN Hello ]
+* Hash -        H[ key => value  key => value ]H
+* Wrapper -     No literal syntax
+* Bytes -       No literal syntax
 
-Note that under the hood,  arrays, lambdas and codes are almost the same thing, just with different flags to tell the interpreter what to do when it
-encounters them.
+Note that under the hood,  arrays, lambdas and codes are almost the same thing, just with different flags to tell the interpreter what to do when it encounters them.
 
 ## String Representations
 
@@ -66,19 +65,21 @@ Throff is homoiconic, which in this case means that all its data structures have
 
     EQUAL 	->STRING ARRAY1		->STRING ARRAY2
 
-hashes should work in a similar manner.
+hashes work in a similar manner.
 
-Native wrappers usually will not work this way, since it is not possible to make a string representation for something like a database handle.  Generally they will have a descriptive string that might be unique for some things (like filehandles).
+Native wrappers usually will not work this way, since it is not possible to make a string representation for something like a database handle.  They have a descriptive string that might be meaningful for some things (like filehandles), but usually not.
 
 ## Symbol Representations
 
-Symbol representations are similar to string representations, but they contain the exact commands needed to recreate the data structure.  The symbol representation is not necessarily homoiconic, instead it is a sequence of commands that, when run by Throff, will recreate the data structure.  This can potentially contain commands to re-open files and network sockets, or do other complex calls.
+Symbol representation is used for manipulating source code.  Requesting symbol output of data returns the commands needed to recreate the data, rather than their string representation.  Symbol output is most useful for EVAL, and can be used to send program code over network sockets.
+
+FIXME rename "symbol representation" to something less confusing.
 
 ## The Datatypes in Detail
 
 ### Boolean
 
-Booleans are created with TRUE, FALSE and EQUAL.  They only matter in an IF function.
+Booleans are created with TRUE, FALSE and EQUAL.  They are only used by the IF function, and the usual logical functions.
 
 ### Strings and Tokens
 
@@ -93,7 +94,7 @@ will force a token containing Hello! onto the datastack.
 
 Almost everything in throff has a string representation, and wherever possible,
 throff acts on strings and strings alone.  Every datatype except WRAPPER may be
-coerced into a STRING, just by using a function that expects a string, like
+coerced into a STRING with ->STRING, or by using a function that expects a string, like
 PRINT or STRING-JOIN.
 
 ### Numbers
@@ -104,7 +105,7 @@ result, arithmatic will be very slow, right up to the point where I add JIT/PIC,
 and then it will be very fast.
 
 If at any point you find yourself wondering "Is this variable a number or a
-string?", the answer is very simple:  it's a string.
+string?", the answer is:  it's a string.
 
 ### Arrays
 
@@ -192,17 +193,17 @@ for access to wrappers.  Wrappers are typically returned by automatically
 generated code that provides access to lower-level functionality.
 
 Wrappers usually won't have a string representation.  If a wrapper is used as a
-string, throff will attempt to print the code that was used to create the  native structure, or just throw an error.
+string, throff will usually attempt to print the code that was used to create the wrapper, or just throw an error.
 
-Since throff uses the string representation of anything as the hash key,
+Since throff uses the string representation of the hash key,
 wrappers should not be used as hash keys, unless you are very sure that the
-string representation will behave correctly.
+string representation exists and is meaningful.
 
 ### Bytes
 
-Bytes are a special type of wrapper, in that Throff has some special functions for manipulating them.  Throff also provides some basic guarantees for working with bytes.  Throff will not move the bytes, so pointers into the bytes will remain valid.  However, you will need to make sure the bytes are not freed by the garbage collector by keeping a Throff binding to the bytes.
+Bytes are a special type of wrapper, in that Throff has some built in functions for manipulating them.  Throff also provides some basic guarantees for working with bytes.  Throff will not move the bytes, so pointers into the bytes will remain valid.  However, you will need to make sure the bytes are not freed by the garbage collector by keeping a Throff binding to the bytes.
 
-You can convert a throff value to bytes with ->BYTES, or make one with MMAPFILE.  You can get the length (in bytes) with LENGTH, read parts of the BYTES with GETBYTE,or set them with SETEBYTE.
+You can convert a throff value to bytes with ->BYTES, or make one with MMAPFILE.  You can get the length (in bytes) with LENGTH, read parts of the BYTES with GETBYTE, or set them with SETBYTE.
 
 ## Function Reference
 
@@ -727,11 +728,11 @@ Example
 
 Case tests each condition (on the left).  If that condition is true, it calls the function on the right.  CASE is an expression, the result of the function is the result of the CASE.
 
-    REBIND COUNT ADD COUNT CASE A[
-         LESSTHAN 0 X       ... -1
-         LESSTHAN X 0       ... 1
-         DEFAULT            ... 0
-     ]A
+    REBIND COUNT => ADD COUNT CASE A[
+                                         LESSTHAN 0 X       ... -1
+                                         LESSTHAN X 0       ... 1
+                                         DEFAULT            ... 0
+                                     ]A
 
 You can provide a function or a value, CASE will use CALL to resolve everything.
 
@@ -767,9 +768,9 @@ See Also
 
 <CATCH>
 
-#### CALL/CC function
+#### CALL/CC lambda
 
-Call **function** with the Current Continuation.  **function** must take one argument
+Call **lambda** with the Current Continuation.  **lambda** must take one argument
 
 Returns
 
@@ -787,7 +788,7 @@ Returns
 
 A PROMISE is a function that delays its execution until needed.  It's a way to get some of the benefits of a lazy language without actually having a lazy language.
 
-**lambda** must return one value, and take no imputs.
+**lambda** must return one value, and take no inputs.
 
 When a promise is created, it delays the execution of **lambda** until the first time that the promise is accessed - usually via its variable name.  e.g.
 
@@ -825,7 +826,7 @@ Returns
 
 Actors are objects that run in their own thread.  Actors receive commands via input queues, and return results over an output queue.  Actors are asynchronous, and are best when used for slow-running code that can run in the background.
 
-A good use of actors is networking code, e.g. fetching webpages, or communicating with a database.
+A good use of actors is networking code, e.g. fetching webpages, or communicating with a database.  They can also be used as mutexes, because they will only process one command at a time.  This makes them ideal for managing updates to databases and network services.  Each command will run in the background, one after the other.
 
 Actors should not be used for small, fast code e.g. numerical code.  Do not, for instance, make an actor that squares a number and returns it.
 
@@ -849,9 +850,9 @@ See Also
 
 CALLA sends a **value** to an **actor**.  Value can be anything e.g. array, hash, wrapper, etc.
 
-CALLA returns a PROMISE.  A PROMISE is function that has not yet computed its value.  The first time it is used, it attempts to calculate its value.  In this case, it will attempt to read a return message from an actor.
+CALLA returns a function that will return the correct value when it has been calculated.  See the section on PROMISEs for more details.
 
-If the actor has finished its calculation and returned a value, then the PROMISE will return immediately with the value.  If the actor has not sent a return value, then the PROMISE will block until the actor sends a value.
+Calling the function will try to fetch the return value from the actor.  If the actor has not finished yet, then the current thread will block until the actor finishes.
 
 The return value is cached and further accesses will be instant.
 
@@ -863,7 +864,7 @@ BIND DOUBLE => ACTOR [ MULT 2 ]
 
 Returns
 
-- a PROMISE.  This is (or will be), the return from the actor
+- a PROMISE.  This is (or will be), the return value from the actor
 
 See Also
 
