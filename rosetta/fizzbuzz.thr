@@ -1,0 +1,15 @@
+FOLD 	[ TRUE EMIT A WHEN B [ EMIT SPACE EMIT , TOK ]  : B : A ] 
+		FALSE 
+		MAP [   
+			IF AND 	EQUAL 0 Three 
+					EQUAL 0 Five  
+						A[ FIZZ BUZZ ]A
+						IF EQUAL 0 Three 
+							 FIZZ 
+							IF EQUAL 0 Five 
+								 BUZZ  
+								 X 
+			: Three MODULO X 3 
+			: Five MODULO X 5  
+			: X  
+		] RANGE 1 200

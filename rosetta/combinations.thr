@@ -1,0 +1,33 @@
+
+PRINTLN A[ [ There are ] LENGTH combinations RANGE 1 10 3 [ ways of choosing 3 from 10 ] ]A
+
+PRINTLN combinations A[ iced jam plain ]A 2
+
+
+DEFINE combinations => [
+  CASE A[
+	EQUAL  K 0      ...  A[ A[ ]A ]A
+    EMPTY? ARR      ...  A[ ]A 
+    DEFAULT         ...  [  APPEND combinations CDR ARR K
+                                   MAP [ A[  CAR ARR  X ]A : X => ] combinations ARR SUB K 1 ] 
+      ]A
+
+      
+  ARG K =>
+  ARG ARR =>
+  ]
+
+BIND DEFAULT => TRUE
+DEFINE CASE => [
+  WHEN NOT EMPTY? ARR [
+  IF CALL TEST [ CALL FUNC ]
+  [ CASE CDR CDR ARR ]
+  ]
+  
+  BIND FUNC => CAR CDR ARR
+  BIND TEST => CAR ARR
+  ARG ARR =>
+]
+  
+DEFINE ... => [ ]
+DEFINE EMPTY? => [ LESSTHAN SWAP 1 LENGTH ]
