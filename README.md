@@ -1,7 +1,15 @@
 # throff
+
+## Get it
+
 the Throff programming language
 
     go get -v github.com/donomii/throff
+    go build ...throff
+
+ Or download a [precompiled binary](http://www.praeceptamachinae.com/)
+ 
+## Throff is
 
 Throff is a dynamically typed, late binding, homoiconic, concatenative programming language.  It has all the features of a modern language - [closures, lexical scopes](http://praeceptamachinae.com/post/throff_variables.html), [tail call optimisations](http://praeceptamachinae.com/post/throff_tail_call_optimisation.html), and continuations.
 
@@ -24,9 +32,9 @@ evaluates Hello (a string), then PRINTLN (a function).  PRINTLN doesn't care how
 
 Throff processes 2, then 1, then ADDs them together, then PRINTLNs the result.  If a function doesn't consume any arguments or return any values, it effectively is invisible, and so you can place it anywhere.
 
-    PRINTLN .S ADD 1 2
+    PRINTLN ADD .S 1 2
 
-will call .S before calling PRINTLN.  .S prints the arguments to its right (i.e. the datastack).  Very handy for debugging!
+will call .S before calling ADD.  .S prints the arguments to its right (i.e. the datastack).  Very handy for debugging!
 
 
 
