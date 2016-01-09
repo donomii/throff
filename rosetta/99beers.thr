@@ -1,20 +1,4 @@
-
 		ITERATE [ PRINTLN    
-			A[ X PL X bottle of beer on the wall, X PL X bottle of beer.  Take one down, pass it round, SUB X 1 PL SUB X 1 bottle of beer on the wall. ]A
+			A[ X PLURAL X bottle of beer on the wall, X PL X bottle of beer.  Take one down, pass it round, SUB X 1 PLURAL SUB X 1 bottle of beer on the wall. ]A
 			: X  
 		] REVERSE RANGE 1 99
-
-DEFINE PL => [
-	IF NOT EQUAL 1 X 
-		[ STRING-CONCATENATE WORD s TOK ]
-		WORD 
-	BIND WORD => 
-	BIND X =>
-]
-		
-DEFINE REVERSE => [
-	NEW
-	ITERATE THIN [ REBIND NEW => UNSHIFTARRAY SWAP NEW ] OLD
-	BIND NEW => NEWARRAY
-	ARG OLD =>
-]

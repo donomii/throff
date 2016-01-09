@@ -538,13 +538,13 @@ Example
 
     > HELLO,WORLD
 
-#### PL number string
+#### PLURAL number string
 
 Pluralises **string** by adding an s to the end if **number** is not equal to one.
 
 Example
 
-    PRINLN A[ 99 PL 99 bottle of beer ]A
+    PRINLN A[ 99 PLURAL 99 bottle of beer ]A
 
     > 99 bottles of beer
 
@@ -633,6 +633,7 @@ Returns the first element of **array**
 #### CDR array
 
 Returns a copy of **array**, with the first element removed
+
 #### APPEND array1 array2
 
 Returns a new array which is array1 with array2 appended to the end.
