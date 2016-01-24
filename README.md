@@ -807,6 +807,10 @@ Returns true if _x_ is less than _y_
 
 #### NOT x
 
+#### AND x y
+
+#### OR x y
+
 #### EMPTY? array
 
 Returns TRUE if _array_ has no elements.
