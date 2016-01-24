@@ -1,4 +1,4 @@
-		ITERATE [ PRINTLN    
-			A[ X PLURAL X bottle of beer on the wall, X PL X bottle of beer.  Take one down, pass it round, SUB X 1 PLURAL SUB X 1 bottle of beer on the wall. ]A
+[ ]		ITERATE [ PRINTLN
+			A[ X PLURAL X bottle of beer on the wall, X PLURAL X bottle of beer.  Take one down, pass it round, SUB X 1 PLURAL SUB X 1 bottle of beer on the wall. ]A
 			: X  
 		] REVERSE RANGE 1 99

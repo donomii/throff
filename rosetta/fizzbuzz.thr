@@ -1,4 +1,4 @@
-FOLD 	[ TRUE EMIT A WHEN B [ EMIT SPACE EMIT , TOK ]  : B : A ] 
+[ ] FOLD [ TRUE EMIT A WHEN B [ EMIT SPACE EMIT , TOK ]  : B : A ]
 		FALSE 
 		MAP [   
 			IF AND 	EQUAL 0 Three 

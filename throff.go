@@ -21,6 +21,7 @@ func main () {
 	}()
 	t := throfflib.MakeEngine()
 	t = throfflib.LoadGraphics(t)
+	t = throfflib.LoadAudio(t)
 	strs := os.Args[1:]
 	//t = t.RunFile("bootstrapgo.lib")
 	t = t.RunString(bootStrapString(), "Internal Bootstrap")
@@ -48,6 +49,20 @@ func bootStrapString( ) string {
 
 	TESTBLOCK [ PRINTLN [ Bootstrap complete, ready for commands ] ]
 
+	DEFINE IFFY => [ IF TRUTHY ]
+
+	DEFINE TRUTHY => [
+
+	CASE A[
+		EQUAL 0 X		...	FALSE
+		LESSTHAN X 0	...	FALSE
+		NOT EQUAL 0  LENGTH X ... TRUE
+		DEFAULT 		...	TRUE
+	]A
+
+	ARG X =>
+]
+
 DEFINE THROW => [
     ACTIVATE/CC ERRORHANDLER A[ TRUE  MSG ]A
     ARG MSG =>
@@ -74,8 +89,9 @@ BIND DEFAULT => TRUE
 
 DEFINE CASE => [
   WHEN NOT EMPTY? ARR [
-  IF CALL TEST [ CALL FUNC ]
-  [ CASE CDR CDR ARR ]
+	IF CALL TEST 
+		[ CALL FUNC ]
+		[ CASE CDR CDR ARR ]
   ]
 
   BIND FUNC => CAR CDR ARR
@@ -904,7 +920,7 @@ DEFINE ITERATE => [
 	ITERATESLICE MFUNC 0 ADD -1 LENGTH ARRAY1 ARRAY1
 
 	ARG ARRAY1 TOK
-	ARG MFUNC  TOK UNFUNC
+	ARG MFUNC  TOK 
 ]
 
 

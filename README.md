@@ -474,6 +474,11 @@ FIXME move this discussion to another page
 
 ### Math Functions
 
+#### FLOOR number
+
+	Discards everything to the right of the decimal point
+	
+
 #### ADD number number
 
 	Adds two numbers
@@ -517,6 +522,10 @@ FIXME move this discussion to another page
 #### LN number
 
 	Natural logarithm
+	
+#### SIN number
+
+	Sine (radiians)
 
 ### String functions
 
@@ -714,13 +723,102 @@ Note that queues are mutable, so they will disable most optimisations for the sc
 
 ### Network
 
+
+#### GETWWW url
+
+	Fetch webpage
+
+	Returns
+		string	- webpage
+		
+
 #### DNS.HOST hostname
 
 	Lookup hostname in the DNS system
 
 	Returns
 		array	- IP addresses
+		
 
+#### DNS.CNAME hostname
+
+	Lookup cname in the DNS system
+
+	Returns
+		string	- canonical DNS name
+		
+
+#### DNS.TXT hostname
+
+	Lookup text records for given hostname in the DNS system
+
+	Returns
+		array - list of text records
+		
+
+#### DNS.REVERSE hostname
+
+	Lookup IP in the DNS system
+
+	Returns
+		array	- list of hostnames for given IP address
+		
+		
+
+### Control flow
+
+#### IF [ condition ] [ true ] [ false ]
+
+The _condition_ value must be TRUE or FALSE, which are values returned by LESSTHAN, NOT, etc.  See the CONDITIONALS section for more
+
+	Example
+	
+	IF [ LESSTHAN X 0 ]
+		[ EMIT [ X is less than 0 ] ]
+		[ EMIT [ X is greater than or equal to 0 ] ]
+		
+or rewriting in more Throffy style:
+
+	EMIT   IF  LESSTHAN X 0
+				[ X is less than 0 ]
+				[ X is greater than or equal to 0 ]
+				
+all flow control is based on IF, such as
+
+#### WHEN [ condition ] [ true ]
+
+Just like IF, but only has a true branch
+
+### Conditionals
+
+Throff IF functions only accept TRUE and FALSE values, as returned by the TRUE and FALSE functions, or other built-ins listed below.  Anything else is an error.
+
+In order to match the convenience of other, more popular languages, Throff offers the TRUTHY function, which attempts to guess whether any value you give it is TRUE or FALSE.
+
+#### EQUAL x y
+
+Returns true if the string value of x is equal to the string value of y.
+
+Warning: Don't use EQUAL on WRAPPERs like file handles, network sockets, database handles, etc.  These things usually do not have string representations, so they will all "be equal", when in fact they are different.
+
+#### LESSTHAN x y
+
+Returns true if _x_ is less than _y_
+
+#### NOT x
+
+#### EMPTY? array
+
+Returns TRUE if _array_ has no elements.
+
+#### TRUTHY x
+
+IF only accepts TRUE or FALSE values, but other languages provide more convenient IF statements that accept any value.  TRUTHY provides this service for THROFF.  Positive numbers are true, zero and negatives are false, and strings with length greater than 0 are true.
+
+#### IFFY [ value ] [ true ] [ false ]
+
+Exactly like IF, except it uses TRUTHY to decide whether _value_ is TRUE or FALSE
+	
 ### Advanced control flow
 
 #### CASE array
