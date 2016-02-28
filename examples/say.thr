@@ -1,0 +1,9 @@
+PRINTLN CALL CALLA act A[ Goodbye, for now. ]A
+PRINTLN CALL CALLA act A[ hello.  I am the talker ]A 
+BIND act => ACTOR [  [ DONE!!!!!!!!!!!!!!!!!!!!!! ]  
+                    REBIND CURRENTPROC => STARTPROCESS /usr/bin/say text
+                    PRINTLN  WAITPROC CURRENTPROC
+                    : text =>
+                     ]
+
+: CURRENTPROC => STARTPROCESS /bin/echo
