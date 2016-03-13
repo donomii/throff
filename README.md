@@ -13,7 +13,7 @@ the Throff programming language
 
 Throff is a dynamically typed, late binding, homoiconic, concatenative programming language.  It has all the features of a modern language - [closures, lexical scopes](http://praeceptamachinae.com/post/throff_variables.html), [tail call optimisations](http://praeceptamachinae.com/post/throff_tail_call_optimisation.html), and continuations.
 
-It has an optional type system, and everything is a function, even language constructs like IF and FOR, which can be replaced and extended with your own versions.  It uses immutable semantics wherever possible to provide safe and secure threading and continuations.  There is almost no lexer/tokeniser, and no parser in the traditional sense.  Commands are fed directly into the engine to be executed.  The programs are written _backwards_. 
+It has an optional type system (still in development), and everything is a function, even language constructs like IF and FOR, which can be replaced and extended with your own versions.  It uses immutable semantics wherever possible to provide safe and secure threading and continuations.  There is almost no lexer/tokeniser, and no parser in the traditional sense.  Commands are fed directly into the engine to be executed.  The programs are written _backwards_. 
 
 Throff is still in development.  The basic language is complete and can be used for minor tasks e.g. text processing.  However things like errors and some programmer friendly features like arity tracking are still in progress.
 
@@ -256,7 +256,7 @@ Calls **function** n times.
 
 -	function	- The function must take no arguments and return no values (i.e. it is called for its side effects)
 
-	Example:
+##### Example:
 
 	REPEAT 10 [ p Hello World ; ]
 
@@ -272,7 +272,7 @@ Starts a new thread to run function.  A clone of the current interpreter is used
 
 -	function 	- The function to run in the new thread.  It must take no arguments and return no values
 
-	Example:
+##### Example:
 
 	THREAD [ p Hello World ; ]
 
@@ -327,7 +327,7 @@ or you can use GETFUNCTION to safely get the value of aFunc
 
 	ARG binds a function argument to **name**.  It is currently an alias to BIND.
 
-	Example:
+##### Example:
 
 	DEFINE greet => [
 		p Hello NAME ;
@@ -361,15 +361,15 @@ or you can use GETFUNCTION to safely get the value of aFunc
 
 	Overwrites an existing binding
 
-	Example
+##### Example
 
 	REBIND x => 20
 
-	Description
+##### Description
 
 	The variable must have been created already with BIND, before it can be rebound
 
-	Note that no matter what happens, the change is only visible inside the current scope.
+	Note that no matter what happens, the change is only visible inside the current (and lower) scope.
 
 
 #### TOK
@@ -380,7 +380,7 @@ or you can use GETFUNCTION to safely get the value of aFunc
 
 	Out of all the functions in Throff, TOK is the only function that can affect anything to the left.  TOK is used to quote function and variable names, preventing them from being resolved to their values. => and = are aliased to TOK, and thus quote the variable name to their left.  This is how you can assign to variable names, without the variable resolving to its stored value.
 
-	Example:
+##### Example:
 
 	PRINTLN TOK
 
@@ -388,7 +388,7 @@ or you can use GETFUNCTION to safely get the value of aFunc
 
 	Instead of printing TOK, TOK pushes the TOKEN "PRINTLN" onto the stack.
 
-	Description:
+##### Description:
 
 	While Throff is bootstrapping, TOK is used to quote function names when they are being defined.
 
@@ -404,7 +404,7 @@ or you can use GETFUNCTION to safely get the value of aFunc
 
 	DEFINE printline => GETFUNCTION PRINTLN TOK
 
-	See Also:
+##### See Also:
 
 	GETFUNCTION
 
@@ -656,32 +656,33 @@ Returns a new array which is array1 with array2 appended to the end.
 
 	H[ key value key value ]H
 
-#### HASHSET hash key value
+#### HASHSET hash key value -> hash
 
-	Sets __key__ to __value__
+	Sets **key** to **value**
 
-	Returns
+##### Returns
 		hash	- a new hash.  The old hash is unmodified
 
-#### SETHASH key value hash
+#### SETHASH key value hash -> hash
 
-	Sets __key__ to __value__
+	Sets **key** to **value**
 
-	Returns
+##### Returns
 		hash	- a new hash.  The old hash is unmodified
 
-#### KEYS hash
+#### KEYS hash -> array
 
-	Returns
+##### Returns
 		array	- the keys of the hash as an array
+
 #### VALUES hash
 
-	Returns
+##### Returns
 		array	- The values of the hash, as an array
 
-#### KEYVALS
+#### KEYVALS -> array
 
-	Returns
+##### Returns
 		array	- The keys and values "flattened" into an array
 
 	Example
@@ -690,7 +691,7 @@ Returns a new array which is array1 with array2 appended to the end.
 
 	-> A[ A 1 B 2 C 3 ]A
 
-#### KEYS/VALS
+#### KEYS/VALS -> array, array
 
 	Returns
 		array	KEYS hash
@@ -706,7 +707,7 @@ Queues are thread safe FIFO queues, most useful for sending messages between thr
 
 Note that queues are mutable, so they will disable most optimisations for the scope that they are used in.  However
 
-#### NEWQUEUE
+#### NEWQUEUE -> queue
 
 	Create a new thread-safe FIFO queue
 
@@ -714,11 +715,11 @@ Note that queues are mutable, so they will disable most optimisations for the sc
 
 	Sends value to queue
 
-#### READQ queue
+#### READQ queue -> value
 
 	Reads a value from queue
 
-	Returns
+##### Returns
 		value	- a single element from the queue
 
 ### Network
@@ -765,13 +766,23 @@ Note that queues are mutable, so they will disable most optimisations for the sc
 		
 		
 
+### I/O
+
+#### EMIT value
+
+Prints **value** to STDOUT
+
+#### PRINTLN value
+
+Prints **value** to STDOUT, followed by a newline.
+
 ### Control flow
 
 #### IF [ condition ] [ true ] [ false ]
 
-The _condition_ value must be TRUE or FALSE, which are values returned by LESSTHAN, NOT, etc.  See the CONDITIONALS section for more
+The **condition** value must be TRUE or FALSE, which are values returned by LESSTHAN, NOT, etc.  See the CONDITIONALS section for more
 
-	Example
+##### Example
 	
 	IF [ LESSTHAN X 0 ]
 		[ EMIT [ X is less than 0 ] ]
@@ -803,7 +814,7 @@ Warning: Don't use EQUAL on WRAPPERs like file handles, network sockets, databas
 
 #### LESSTHAN x y
 
-Returns true if _x_ is less than _y_
+Returns true if **x** is less than **y**
 
 #### NOT x
 
@@ -813,7 +824,7 @@ Returns true if _x_ is less than _y_
 
 #### EMPTY? array
 
-Returns TRUE if _array_ has no elements.
+Returns TRUE if **array** has no elements.
 
 #### TRUTHY x
 
@@ -821,7 +832,7 @@ IF only accepts TRUE or FALSE values, but other languages provide more convenien
 
 #### IFFY [ value ] [ true ] [ false ]
 
-Exactly like IF, except it uses TRUTHY to decide whether _value_ is TRUE or FALSE
+Exactly like IF, except it uses TRUTHY to decide whether **value** is TRUE or FALSE
 	
 ### Advanced control flow
 
@@ -829,7 +840,7 @@ Exactly like IF, except it uses TRUTHY to decide whether _value_ is TRUE or FALS
 
 Much neater than multiple if statements, CASE provides a compact way to do multiple tests, in order.
 
-Example
+##### Example
 
     CASE A[
          LESSTHAN 0 X       ... [ PRINTLN [ X IS GREATER THAN 0 ] ]
@@ -871,7 +882,7 @@ THROW causes an error condition, which will be caught by the previously declared
 
 **message** can be any value
 
-Returns
+##### Returns
 
 THROW does not return
 
@@ -895,7 +906,7 @@ Returns
 
 - Nothing.  ACTIVATE/CC never returns
 
-#### PROMISE lambda
+#### PROMISE lambda -> promise
 
 A PROMISE is a function that delays its execution until needed.  It's a way to get some of the benefits of a lazy language without actually having a lazy language.
 
@@ -906,18 +917,21 @@ When a promise is created, it delays the execution of **lambda** until the first
     PRINTLN GREETING
     BIND GREETING => PROMISE [ HELLO ]
 
-Promises are most useful when they are used on code that is expensive to run, like database or network calls.  So for instance, instead of loading data from the database for all employees and putting it into an array, you can fill the array with PROMISES which will fetch the data when accessed.
+Promises are most useful when they are used on code that is expensive to run, like database or network calls.  So for instance, instead of loading data from the database for all employees and putting it into an array, you can fill the array with PROMISES which will delay fetching the data until accessed.
 
 After the **lambda** runs, its return value is cached, and the **lambda** is not called again.  **lambda** is only ever called once.
 
+Example
 
-Note
+    MAP [ PROMISE [ database-fetch USER ] ARG USER => ] [ BOB MARY SUE DAVE ]
 
-Promises are easy to trigger accidentally by passing them to a function that accesses them.  For instance, calling MAP on an array of PROMISEs will activate every PROMISE in the array, because MAP takes each element from the input array and "accesses" it while calling the map function.
+Notes about "forcing" promises
 
-Note
+Promises are difficult to handle without accidentally triggering the code, and sometimes it is possible to forget to trigger the code, resulting in printing out the code to be executed, rather than its result.  The easiest way to handle promises is to use ->LAMBDA to convert it to a normal LAMBDA, and then use CALL to fetch the result when you know you want it.  You can also safely handle promises by putting them in ARRAYs or HASHes.
 
-Promises are easy to NOT trigger accidentally.  Because a promise is just a function, it has to be used like a function to work.  If you never assign it to a variable and then use it, the function won't run.  e.g.
+Promises can be triggered accidentally by passing them to a function that accesses them.  For instance, calling MAP on an array of PROMISEs will activate every PROMISE in the array, because MAP takes each element from the input array and "accesses" it.  Other array functions like FOLD, FILTER, etc will do the same.
+
+Because a promise is just a function, it has to be used like a function to work.  If you never assign it to a variable and then use it, or use CALL on it, then the function won't run.  e.g.
 
    PRINTLN PROMISE [ HELLO ]
 
@@ -925,13 +939,29 @@ does not print HELLO, it prints [ FUNCTION DEFINITION ].  You actually need
 
    PRINTLN CALL PROMISE [ HELLO ]
 
-Example
 
-    MAP [ PROMISE [ database-fetch USER ] ARG USER => ] [ BOB MARY SUE DAVE ]
+##### Returns
+- A PROMISE.
 
-Returns
-- A PROMISE.  
+### Debugging
 
+#### .S
+
+Prints out the current data stack in an (almost) human readable format.
+
+#### TRON
+
+Trace on.  Prints out every function as it is executed
+
+#### TROFF
+
+Trace off.  Stops printing out program flow.
+
+Note to self: having a trace level setting would be very useful
+
+#### DUMP value -> string
+
+Converts the internal data structure into a string.  Not useful unless you are looking at the interpreter.
 
 ### Actors
 
@@ -943,7 +973,7 @@ Actors should not be used for small, fast code e.g. numerical code.  Do not, for
 
 Each message to an actor requires several rounds of locking and hash accesses, so it works better when wrapping slower code.
 
-#### ACTOR lambda
+#### ACTOR lambda -> actor
 
 Create a new actor. **lambda** will be called for each message sent to the actor.  **lambda** must take one argument and return one value, which will be written to the output queue.
 
@@ -957,26 +987,57 @@ See Also
 
 CALLA
 
-#### CALLA actor value
+#### CALLA actor value -> resultFunction
 
 CALLA sends a **value** to an **actor**.  Value can be anything e.g. array, hash, wrapper, etc.
 
-CALLA returns a function that will return the correct value when it has been calculated.  See the section on PROMISEs for more details.
+CALLA returns a **resultFunction** that takes no args but will return the correct value when it has been calculated.  See the section on PROMISEs for more details.
 
-Calling the function will try to fetch the return value from the actor.  If the actor has not finished yet, then the current thread will block until the actor finishes.
+Calling the **resultFunction** will try to fetch the return value from the actor.  If the actor has not finished yet, then the current thread will block until the actor finishes.
 
 The return value is cached and further accesses will be instant.
 
-Example
+##### Example
 
-PRINTLN VALUE
-BIND VALUE => CALLA DOUBLE 2
-BIND DOUBLE => ACTOR [ MULT 2 ]
+    PRINTLN VALUE
+    BIND VALUE => CALLA DOUBLE 2
+    BIND DOUBLE => ACTOR [ MULT 2 ]
 
-Returns
+##### Returns
 
 - a PROMISE.  This is (or will be), the return value from the actor
 
 See Also
 
 ACTOR, PROMISE
+
+### Sub processes
+
+Throff supports starting subprocesses (other programs), and the ability to wait for or kill them.  Functions to capture the STDOUT/STDERR coming soon.
+
+#### STARTPROCESS path A[ arg0 arg1 arg2 ... ]A
+
+Start another program at **path**.  The **args** list will be passed to the program as its argument list.  Note that the first element of args will be the $0 arg for the program, which is usually set to the **path** by other languages.  You can set anything you want there, but some programs might rely on it being the path to the program.  You must provide something for the 0th arg, as all programs start reading the arg list from the 1st place.  e.g.
+
+    STARTPROCESS /bin/echo [ /bin/echo Hello world ]
+
+If you omit the second /bin/echo, echo will only print "world"
+
+##### Returns
+
+- ProcHandle  A native wrapper around a process handle.  Used by KILLPROC and WAITPROC.
+
+#### KILLPROC ProcHandle -> resultCode
+
+Immediately kill the process represented by **ProcHandle**.
+
+##### Returns
+- code  A success code.
+
+#### WAITPROC ProcHandle -> Summary
+
+Wait for the subprocess **ProcHandle** to finish before continuing.
+
+##### Returns
+
+- Summary   A summary of the process' execution, e.g. time, exit code, etc
