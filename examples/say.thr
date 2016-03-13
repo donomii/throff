@@ -1,9 +1,11 @@
-SLEEP 5000
-PRINTLN CALL CALLA act A[ Goodbye, for now. ]A
-PRINTLN CALL CALLA act A[ hello.  I am the talker ]A
-BIND act => ACTOR [ [ DONE!!!!!!!!!!!!!!!!!!!!!! ]
-                    STARTPROCESS /usr/bin/say A[ text ]A
-                    WAITPROC STATE
+PRINTLN CALL CALLA act A[ Goodbye. [[emph +]] for now. ]A
+SLEEP 2000
+BIND result => CALLA act  listing
+PRINTLN listing
+BIND listing =>  STRING-JOIN [ [[ slnc 250 ]] ] LS
+BIND act => ACTOR [ A[ Finished saying text ]A
+                    STARTPROCESS /usr/bin/say A[ -v Karen text ]A
+                    KILLPROC STATE
                     : STATE =>
                     : text =>
                      ]
