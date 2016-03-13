@@ -21,7 +21,7 @@ func main () {
 	}()
 	t := throfflib.MakeEngine()
 	t = throfflib.LoadGraphics(t)
-	t = throfflib.LoadAudio(t)
+	//t = throfflib.LoadAudio(t)
 	strs := os.Args[1:]
 	//t = t.RunFile("bootstrapgo.lib")
 	t = t.RunString(throfflib.BootStrapString(), "Internal Bootstrap")
