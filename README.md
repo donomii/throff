@@ -123,7 +123,7 @@ don't contain a WRAPPER have a string representation.  This string is usually
 calculated on-the-fly, so you don't have to worry wasting memory on the string
 component.
 
-Arrays may be converted to LAMBDAs with ->LAMBDA or UNFUNC, and to CODEs with ->CODE.  If you do
+Arrays may be converted to LAMBDAs with ->LAMBDA, and to CODEs with ->CODE.  If you do
 this, the newly formed function will run in the same namespace that it was
 defined in.  You can change the environment it runs in with SETENVIRONMENT.
 
@@ -132,21 +132,36 @@ defined in.  You can change the environment it runs in with SETENVIRONMENT.
 A lambda is a function that can be passed around like data.  Lambdas are created
 with [ ].  Lambdas are activated by CALL.
 
-    CALL LAMBDA [ PRINTLN Hello ]
+    CALL [ PRINTLN Hello ]
 
 will result in
 
     Hello
 
+LAMBDAs are the fundamental component of Throff.  Using the [ ] brackets always creates
+a LAMBDA, no matter the context.  There is nothing special about the IF function - 
+it is just a function that takes 3 LAMBDA arguments.
+
+LAMBDAs can be converted to arrays
+
+    BIND my_array => ARRAY some_lambda
+
+LAMBDAs can be converted to strings like this:
+
+    BIND my_string => STRING GETFUNCTION some_function TOK
+
 
 ### Code
 
-Functions are kept as native arrays, and are created with the [ ] characters.
+Functions are kept as native arrays, and are created with 
+
+    -> FUNC [ ]
+
 Note that because CODE is a datatype, any variable holding a function (that is,
 a CODE) immediately becomes a function, like this:
 
-	  a
-	  BIND a => say_hello
+    a
+    BIND a => say_hello
     DEFINE say_hello => [ PRINTLN Hello ]
 
 will output
@@ -155,10 +170,12 @@ will output
 
 This means that any attempt to use functions as arguments to other functions will explode in your face.  For instance
 
-	MAP PRINT [ 1 2 3 4 ]
+    MAP PRINT [ 1 2 3 4 ]
 
 will print out
-	[ 1 2 3 4 ]
+
+    [ 1 2 3 4 ]
+
 instead of 1234.
 
 
@@ -167,11 +184,16 @@ LAMBDAs.  CODEs can be converted to LAMBDAs like this:
 
     SET my_lambda = LAMBDA GETFUNCTION PRINT TOK
 
-This will get the print function and store it in my_lambda
+but by far the easiest way to do this is to wrap the function
+
+    SET my_lambda = [ PRINT ]
+    MAP [ PRINT ] [ 1 2 3 4 ]
+
+This will get the PRINT function and store it in my_lambda
 
 You can call a CODE or a LAMBDA with CALL.
 
-    CALL my_lambda
+    CALL GETFUNCTION my_lambda TOK
 
 
 CODEs can be converted to arrays like this:
