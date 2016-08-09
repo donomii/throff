@@ -1,0 +1,7 @@
+FOREVER [ PRINTLN A[ BYTE2STR READQ readq ]A ]
+WRITEQ writeq STRING-CONCATENATE {"op":"unconfirmed_sub"} CR
+WEBSOCKETCLIENT  wss://ws.blockchain.info/inv  [ ] http://localhost/ writeq readq
+
+PRINTLN writeq
+: readq => NEWQUEUE
+: writeq => NEWQUEUE
