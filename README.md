@@ -17,16 +17,16 @@ It has an optional type system (still in development), and everything is a funct
 
 Throff is still in development.  The basic language is complete and can be used for minor tasks e.g. text processing.  However things like errors and some programmer friendly features like arity tracking are still in progress.
 
-## Program direction
+## Program flow
 
 Throff programs start at the _bottom_ and are evaluated backwards until they reach the top, where they finish.  Actually, the line breaks are removed and the program becomes one long line, which is evaluated from right-to-left.
 
 
-All Throff functions operate on the result of code to the right of the function.
+All Throff functions (bar one) operate on the result of code to the right of the function.  A program is one long chain of function calls, each one transforming the output of the function to the right.
 
     PRINTLN Hello
 
-evaluates Hello (a string), then PRINTLN (a function).  PRINTLN doesn't care how its argument is made, so you can put any code there.
+evaluates Hello (a string), then PRINTLN (a function).  PRINTLN prints the result of the function to its right, so you can replace Hello with anything, like ADD.
 
     PRINTLN ADD 1 2
 
@@ -36,24 +36,23 @@ Throff processes 2, then 1, then ADDs them together, then PRINTLNs the result.  
 
 will call .S before calling ADD.  .S prints the arguments to its right (i.e. the datastack).  Very handy for debugging!
 
-
-
 ## Goals
 
 * To create a small, simple and portable interpreter (mostly complete)
-* quick and effective access to platform libraries like graphics, databases, etc
+* To design a language that builds itself from basic principles to advanced language constructs (going nicely)
+* quick and effective access to platform libraries like graphics, databases, etc (not so good)
 * a simple and highly configurable language (good so far)
-* the best interactive debugger, with rewind and undo functionality (promising so far)
+* the best interactive debugger, with rewind and undo functionality (possible but not implemented well)
 * Support advanced language features like first-class continuations (mostly complete)
 * a familiar interface available everywhere
-* to minimise the use of explicit typing where possible
+* to minimise the use of explicit typing where possible (while still providing useful typing)
 
 
 ## Throff datatypes
 
+Throff datatypes are still a work in progress, as I come to understand the most effective ways to structure them.  At the moment, there are the following datatypes, with their literal syntax:
 
-Throff datatypes are still a work in progress, as I come to understand the most effective ways to structure them.  At the moment, there are the following
-datatypes, with their literal syntax:
+### Throff literals
 
 * Boolean -     TRUE, FALSE
 * String -      ->STRING [ This is a string ]
@@ -69,7 +68,7 @@ Note that under the hood,  arrays, lambdas and codes are almost the same thing, 
 
 ## String Representations
 
-Throff is homoiconic, which in this case means that all its data structures have explicit string representations.  Every Throff data structure can be used as a string.  So a simple way to compare nested arrays is to compare their string representations:
+Throff is homoiconic, which in this case also means that all its data structures have explicit string representations.  Every Throff data structure can be used as a string.  So a simple way to compare nested arrays is to compare their string representations:
 
     EQUAL 	->STRING ARRAY1		->STRING ARRAY2
 
@@ -93,17 +92,21 @@ Booleans are created with TRUE, FALSE and EQUAL.  They are only used by the IF f
 
 Strings and tokens are treated exactly the same, except that strings require quotes around them, and tokens are printed raw.  This matters when trying to print out a data structure (or code) to be evaluated later. Tokens are usually created by the parser, usually for function names etc, while strings are created from TOKENs or directly by reading from a socket or file.
 
+### Avoiding variable lookup
+
+Almost everything in throff has a string representation, and wherever possible,
+throff acts on strings and strings alone.  Every datatype except WRAPPER may be
+coerced into a STRING with ->STRING, or by using a function that expects a string, like
+PRINT or STRING-JOIN.
+
+Any TOKEN that is a variable name is automatically replaced with its value, making it impossible to grab the variable name (the token) itself.  While you can use ->TOKEN [ A STRING ], you probably want to get the lexical environment along with the token, so instead you can prevent variable lookup with the _TOK_ command.
+
 Tokens may be forced explicitly with the TOK command, which is the only command in Throff
 that acts on arguments to its _left_.
 
     Hello! TOK
 
 will force a token containing Hello! onto the datastack.
-
-Almost everything in throff has a string representation, and wherever possible,
-throff acts on strings and strings alone.  Every datatype except WRAPPER may be
-coerced into a STRING with ->STRING, or by using a function that expects a string, like
-PRINT or STRING-JOIN.
 
 ### Numbers
 
@@ -239,11 +242,11 @@ You can convert a throff value to bytes with ->BYTES, or make one with MMAPFILE.
 
 #### THIN function
 
-THIN converts a function into a THIN function, which has no lexical environment - it shares its parents' lexical scope
+THIN converts a function into a THIN function, which has no private lexical environment - it shares its parents' lexical scope.
 
 #### MACRO function
 
-MACRO converts a function into a MACRO.  MACROs have no lexical environment - they use the same environment as the caller (dynamic scope).
+MACRO converts a function into a MACRO.  MACROs have no lexical environment at all - they use the same environment as the caller (dynamic scope).
 
 #### WITH array FROM hash
 
@@ -253,7 +256,7 @@ Inserts hashkeys into the current namespace
 
 Loads the requested keys from the hash and puts them in the current environment.  
 
-Updating the variables will not update the hash nor vice versa.
+Updating the variables will not update the hash nor vice versa.  HASHes, like everything else in throff, are immutable.
 
 ##### Parameters:
 
@@ -302,7 +305,7 @@ Starts a new thread to run function.  A clone of the current interpreter is used
 
 #### DEFINE name => value
 
-Sets the variable **name** to **value**
+Defines a function **name** with body **value**
 
 
 ##### Parameters:
@@ -312,9 +315,9 @@ Sets the variable **name** to **value**
 
 ##### Description:
 
-DEFINE sets a variable.  name does not need to be quoted, so long as you remember to put the => operator afterwards.  
+DEFINE creates a function.  **name** does not need to be quoted, so long as you remember to put the => operator afterwards.  
 
-**value**  must be a function definition (LAMBDA or CODE), and **name** will become a function.  Any time name appears in the program, it will automatically activate.  This can cause some nasty bugs, for example:
+**value**  must be a function definition (LAMBDA or CODE), and **name** will become a function.  Any time **name** appears in the program, it will automatically activate.  This can cause some nasty bugs, for example:
 
 	DEFINE print_code => [
 		p Code is aFunc ;
@@ -331,16 +334,24 @@ if you use print_code on a function, you will get, at best, a crash
 Instead of printing out ADD, the program crashes because the variable aFunc became a function that tries to add the next two arguments, in this case, the letter ';' and the top of the stack.  To avoid this mishap, you will need to typecast the arguments to your function:
 
 	ARG aFunc => ->LAMBDA
+	
+or
+
 	ARG aFunc => ->STRING
+
+or
+
 	ARG aFunc => ->ARRAY
 
 or you can use GETFUNCTION to safely get the value of aFunc
 
-	GETFUNCTION aFunc TOK
+	p Code is GETFUNCTION aFunc TOK ;
 
-	Returns: nothing
+##### Returns
+	
+	nothing
 
-	See Also:
+##### See Also
 
 	BIND, REBIND, TOK, GETFUNCTION, ARG, CALL, ->LAMBDA
 
@@ -425,6 +436,8 @@ or you can use GETFUNCTION to safely get the value of aFunc
 	it will fail because PRINTLN will activate.  To get the function behind PRINTLN
 
 	DEFINE printline => GETFUNCTION PRINTLN TOK
+	
+	Note that => is just syntactic sugar for TOK, as are several other symbols I can't recall right now.
 
 ##### See Also:
 
@@ -434,12 +447,12 @@ or you can use GETFUNCTION to safely get the value of aFunc
 
 	Calls a function or a lambda
 
-	Call activates a function, which are built with [ ] or fetched with GETFUNCTION
+	Call activates a lambda function, which are built with [ ] or fetched with GETFUNCTION
 
 	Example:
 
-	CALL [ p Hello World ; ]
-	CALL GETFUNCTION PRINTLN TOK
+	CALL [ PRINTLN [ Hello World ] ]
+	CALL GETFUNCTION PRINTLN TOK [ Hello World ]
 
 	DEFINE myHello => [ p Hello my world ; ]
 
@@ -555,7 +568,7 @@ FIXME move this discussion to another page
 
 Returns a new string, which is s1 with s2 appended
 
-#### STRING-CONCATENTE* array
+#### STRING-CONCATENATE* array
 
 Returns a new string, which is all the elements of **array** concatenated together.
 
@@ -581,11 +594,11 @@ Example
 
 ### Byte functions
 
-Bytes provide direct memory access to data.  Unlike everything else in Throff, they are mutable by default.
+Bytes provide direct memory access.  Unlike everything else in Throff, they are mutable by default.  They are also a good way to to corrupt memory and cause throff to crash.
 
 #### ->BYTES
 
-Converts any throff data into a BYTES.  If the input is a WRAPPER, then it will be used unchanged (and without being copied into a new structure, like the other type converters).  Any other data will be converted to a STRING, and then that STRING will be used as BYTES.
+Converts any throff data into a BYTES.  If the input is a WRAPPER, then it will be used unchanged (and without being copied into a new memory location, which is what the other type converters do).  Any data other than WRAPPERs will be converted to a STRING, and then that STRING will be used as BYTES.
 
 #### GETBYTE position bytes
 
@@ -595,7 +608,13 @@ Gets the byte at **position** from **bytes**.
 
 A string, containing the ASCII representation of the byte.
 
+FIXME should this be returning a string?
+
 #### SETBYTE position value bytes
+
+FIXME implement this
+
+#### BYTE-LENGTH bytes
 
 FIXME implement this
 
@@ -605,9 +624,11 @@ FIXME implement this
 
 #### NEWARRAY
 
-	Create a new array or use the literal
+	Create an empty new array
+	
+	Note: You can also use the literal
 
-	A[ 1 2 3 4 ]A
+	A[ ]A
 
 #### ARRAYPUSH array item
 
@@ -674,9 +695,11 @@ Returns a new array which is array1 with array2 appended to the end.
 
 #### NEWHASH
 
-	Create a new hash, or use the literal
+	Create a new hash
+	
+	Note: you can use the literal
 
-	H[ key value key value ]H
+	H[ ]H
 
 #### HASHSET hash key value -> hash
 
@@ -702,7 +725,7 @@ Returns a new array which is array1 with array2 appended to the end.
 ##### Returns
 		array	- The values of the hash, as an array
 
-#### KEYVALS -> array
+#### KEYVALS hash -> array
 
 ##### Returns
 		array	- The keys and values "flattened" into an array
@@ -822,7 +845,7 @@ all flow control is based on IF, such as
 
 Just like IF, but only has a true branch
 
-### Conditionals
+### Conditionals & logic operations
 
 Throff IF functions only accept TRUE and FALSE values, as returned by the TRUE and FALSE functions, or other built-ins listed below.  Anything else is an error.
 
