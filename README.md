@@ -564,11 +564,27 @@ FIXME move this discussion to another page
 
 ### String functions
 
+#### GETSTRING n astring
+
+Gets the *n*th letter of *astring*
+
+#### SETSTRING n letter string
+
+Sets the *n*th *letter* of *string*
+
+#### SLICE-STRING start end string
+
+Extracts and returns a substring of *string*, from *start* to *end*
+
 #### STRING-CONCATENTE s1 s2
 
 Returns a new string, which is s1 with s2 appended
 
-#### STRING-CONCATENATE* array
+#### STRING-JOIN separator array
+
+Combines *array* into a single string, with *separator* placed between each element of *array*.
+
+#### STRING-CONCATENTE* array
 
 Returns a new string, which is all the elements of **array** concatenated together.
 
@@ -591,6 +607,14 @@ Example
     PRINLN A[ 99 PLURAL 99 bottle of beer ]A
 
     > 99 bottles of beer
+
+#### RUNSTRING string environment
+
+Evaluates *string* inside *environment*.  You can get an environment from almost any throff type (except macros) using ENVIRONMENTOF.
+
+You can get the current environment with
+
+    ENVIRONMENTOF [ THIS ]
 
 ### Byte functions
 
@@ -1086,3 +1110,43 @@ Wait for the subprocess **ProcHandle** to finish before continuing.
 ##### Returns
 
 - Summary   A summary of the process' execution, e.g. time, exit code, etc
+
+### NAMESPACES and SCOPES
+
+Namespaces and scopes are still a bit wobbly in Throff, but are at the point where they function well enough to be called 'feature complete'.
+
+Manipulating them directly is usually safe, because they are /immutable/.  Or /mostly/ immutable.
+
+Scopes are throff hashes, and if you can get a reference to them, you can use ordinary throff hash functions on them.
+
+Scopes are all nested, with the root scope being the initial scope that the program starts with.  Variables can be looked up with GETLEX, which will search every scope from the current up to the root.
+
+The current scope is mutable but all other scopes (especially parent) are immutable, although it is not hard to find a way to modify the memory of another scope.  Doing this will not work the way you want it to, since scopes are often copied or optimised away.
+
+Almost every [ ] introduces a new scope (MACROs and THIN functions excepted).  This means you can't update variables inside a MAP or FOLD or FOR loop, because all the variables inside the [ ] are discarded.
+
+BIND creates a new variable in the current scope, and fails if the variable already exists.  REBIND either replaces a BIND, or shadows a variable in the parent scope.  Throff will throw an error if you attempt to bind a variable name that is already bound in a parent scope.
+
+There are two special types of scoping rules:  THIN and MACRO.
+
+MACROs have no scope when they are defined, they temporarily gain one when they are run, enabling them to create and destroy variables in other scopes.  MACROs are heavily used to implement language features, and should also be quite fast (since we don't have to create a scope when they run).
+
+THIN functions are probably a bad idea.  THIN functions use their parent scope, and not their own, when they run.  This does allow you to update variables from inside a FOR loop, but it is a very bad idea in general, since, among other things, it prevents any optimisation of that scope.
+
+SETLEX name value
+
+Sets the variable *name* to *value*.  *name* must already exist as a variable.  Better to use BIND (TODO delete SETLEX?)
+
+SCRUBLEX name
+
+Deletes variable *name*.  *name* must already exist.
+
+GETLEX name
+
+Looks up the value of *name* using the current scope.
+
+: name value
+
+Creates binding *name* and sets its value to *value*.  Fails if *name* alredy exists.
+
+(Also known as BIND)
