@@ -1,0 +1,76 @@
+PRINTLN DROP SWAP STRING-CONCATENATE* REVERSE mapWhile [ matchChars digitChars ] STRING-EXPLODE 123abcdefg12345567
+
+DEFINE matchString => [ commonHeadMap [ EQUAL ] SWAP STRING-EXPLODE SWAP STRING-EXPLODE ]
+
+COMMENT [ Takes a lambda and two arrays, returns the common head, and the remaining tails of the two arrays.  The tails may be empty arrays if both arrays are identical.
+
+Lambda is the comparison function, usually [ EQUAL ] ]
+
+DEFINE commonHeadMap => [
+    IF OR  EMPTY? ARR1  EMPTY? ARR2
+        [ [ ] ARR1 ARR2 ]
+        [
+            IF CALL func CAR ARR1 CAR ARR2
+                [ APPEND  A[ CAR ARR1 ]A commonHeadMap func CDR ARR1 CDR ARR2 ]
+                [ [ ] ARR1 ARR2 ]
+        ]
+
+    ARG ARR2 => ->ARRAY
+    ARG ARR1 => ->ARRAY
+    ARG func => ->LAMBDA
+]
+
+DEFINE mapWhile => [
+    IF EMPTY? ARR1
+        [ [ ] ARR1 ]
+        [
+            IFFY CALL func CAR ARR1
+                [ APPEND  A[ CAR ARR1 ]A mapWhile func CDR ARR1 ]
+                [ [ ] ARR1 ]
+        ]
+
+    ARG ARR1 => ->ARRAY
+    ARG func => ->LAMBDA
+]
+
+
+COMMENT [ Compare two arrays ]
+
+DEFINE STRING-EXPLODE => [ mapString [ ] ->STRING ]
+
+DEFINE mapString => [
+    MAP [ CALL func GETSTRING SWAP string ] RANGE 0 LASTINDEX string
+
+    PRINTLN LENGTH string
+    PRINTLN string
+    EMIT [ Scanning ... ]
+
+    ARG string
+    ARG func
+]
+
+DEFINE matchAlpha => [
+
+    IF LESSTHAN 0 LENGTH filtered
+        A[ TRUE STRING-CONCATENATE* filtered ]A
+        A[ FALSE ]A
+    
+
+    BIND filtered => MAP [ CAR CDR ] REVERSE FILTER [ CAR ] mapString [ matchChars alphaChars  ] ->STRING
+]
+
+DEFINE matchChars => [
+    IF LESSTHAN 0 LENGTH filtered
+        A[ TRUE testChar ]A
+        A[ FALSE ]A
+
+    BIND filtered =>  FILTER [ EQUAL testChar ] chars
+
+    ARG testChar
+    ARG chars
+]
+
+DEFINE LASTINDEX => [ SUB1 LENGTH ]
+BIND digitChars => ->ARRAY [ 0 1 2 3 4 5 6 7 8 9 ]
+BIND alphaChars => ->ARRAY [ a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z ]
+
