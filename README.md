@@ -92,16 +92,18 @@ Booleans are created with TRUE, FALSE and EQUAL.  They are only used by the IF f
 
 Strings and tokens are treated exactly the same, except that strings require quotes around them, and tokens are printed raw.  This matters when trying to print out a data structure (or code) to be evaluated later. Tokens are usually created by the parser, usually for function names etc, while strings are created from TOKENs or directly by reading from a socket or file.
 
-### Avoiding variable lookup
-
 Almost everything in throff has a string representation, and wherever possible,
 throff acts on strings and strings alone.  Every datatype except WRAPPER may be
 coerced into a STRING with ->STRING, or by using a function that expects a string, like
 PRINT or STRING-JOIN.
 
-Any TOKEN that is a variable name is automatically replaced with its value, making it impossible to grab the variable name (the token) itself.  While you can use ->TOKEN [ A STRING ], you probably want to get the lexical environment along with the token, so instead you can prevent variable lookup with the _TOK_ command.
+### Variable lookup
 
-Tokens may be forced explicitly with the TOK command, which is the only command in Throff
+Variable names in throff are actually tokens.  When throff finds a token, it tries to look it up in the local symbol table to find the value.  If it has a value (if it is a variable), throff replaces the variable name with the value, then continues processing.
+
+Because a variable name is automatically replaced with its value, it is impossible to grab the variable name (the token) itself, which is necessary for writing macros.  Using the _TOK_ function prevents variable lookup and gives you the token to its _left_.
+
+The TOK command, is the only command in Throff
 that acts on arguments to its _left_.
 
     Hello! TOK
