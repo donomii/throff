@@ -230,7 +230,7 @@ generated code that provides access to lower-level functionality.
 Wrappers usually won't have a string representation.  If a wrapper is used as a
 string, throff will usually attempt to print the code that was used to create the wrapper, or just throw an error.
 
-Since throff uses the string representation of the hash key,
+Since throff uses the string representation of data as the hash key,
 wrappers should not be used as hash keys, unless you are very sure that the
 string representation exists and is meaningful.
 
