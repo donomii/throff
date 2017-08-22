@@ -998,11 +998,12 @@ Example
 
 Notes about "forcing" promises
 
-Promises are difficult to handle without accidentally triggering the code, and sometimes it is possible to forget to trigger the code, resulting in printing out the code to be executed, rather than its result.  The easiest way to handle promises is to use ->LAMBDA to convert it to a normal LAMBDA, and then use CALL to fetch the result when you know you want it.  You can also safely handle promises by putting them in ARRAYs or HASHes.
 
 Promises can be triggered accidentally by passing them to a function that accesses them.  For instance, calling MAP on an array of PROMISEs will activate every PROMISE in the array, because MAP takes each element from the input array and "accesses" it.  Other array functions like FOLD, FILTER, etc will do the same.
 
-Because a promise is just a function, it has to be used like a function to work.  If you never assign it to a variable and then use it, or use CALL on it, then the function won't run.  e.g.
+While promises are difficult to handle without accidentally triggering the code, sometimes it is possible to forget to trigger the code, resulting in printing out the promise, rather than its result.  The easiest way to handle promises is to use ->LAMBDA to convert it to a normal LAMBDA, and then use CALL to fetch the result when you know you want it.  You can also safely handle promises by putting them in ARRAYs or HASHes.
+
+Because a promise is just a function, it has to be used like a function.  If you never assign it to a variable and then use it, or use CALL on it, then the function won't run.  e.g.
 
    PRINTLN PROMISE [ HELLO ]
 
@@ -1125,7 +1126,7 @@ Scopes are all nested, with the root scope being the initial scope that the prog
 
 The current scope is mutable but all other scopes (especially parent) are immutable, although it is not hard to find a way to modify the memory of another scope.  Doing this will not work the way you want it to, since scopes are often copied or optimised away.
 
-Almost every [ ] introduces a new scope (MACROs and THIN functions excepted).  This means you can't update variables inside a MAP or FOLD or FOR loop, because all the variables inside the [ ] are discarded.
+Almost every [ ] introduces a new scope (MACROs and THIN functions are exceptions).  This means you can't update variables inside a MAP or FOLD or FOR loop, because all the variables inside the [ ] are discarded.
 
 BIND creates a new variable in the current scope, and fails if the variable already exists.  REBIND either replaces a BIND, or shadows a variable in the parent scope.  Throff will throw an error if you attempt to bind a variable name that is already bound in a parent scope.
 
