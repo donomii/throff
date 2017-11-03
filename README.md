@@ -8,7 +8,19 @@ the Throff programming language
     go build ...throff
 
  Or download a [precompiled binary](https://github.com/donomii/throff/releases)
- 
+
+## Use it
+
+### Run-and-quit
+
+	throff ADD 1 1
+
+### Interactive shell
+
+	> throff
+	Welcome to the THROFF command shell v0.1. Type HELP for help.
+	Throff »
+
 ## Throff is
 
 Throff is a dynamically typed, late binding, homoiconic, concatenative programming language, taking inspiration from Forth and Joy.  It has all the features of a modern language - [closures, lexical scopes](http://praeceptamachinae.com/post/throff_variables.html), [tail call optimisations](http://praeceptamachinae.com/post/throff_tail_call_optimisation.html), currying, and continuations.
