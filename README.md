@@ -14,6 +14,7 @@ the Throff programming language
 ### Run-and-quit
 
 	throff ADD 1 1
+	2
 
 ### Interactive shell
 
