@@ -7,7 +7,7 @@ the Throff programming language
     go get -v github.com/donomii/throff
     go build ...throff
 
- Or download a [precompiled binary](http://www.praeceptamachinae.com/projects/throff)
+ Or download a [precompiled binary](https://github.com/donomii/throff/releases)
  
 ## Throff is
 
