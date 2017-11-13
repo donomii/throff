@@ -30,7 +30,7 @@ the Throff programming language
 
 Throff is a dynamically typed, late binding, homoiconic, concatenative programming language, taking inspiration from Forth and Joy.  It has all the features of a modern language - [closures, lexical scopes](http://praeceptamachinae.com/post/throff_variables.html), [tail call optimisations](http://praeceptamachinae.com/post/throff_tail_call_optimisation.html), currying, and continuations.
 
-It has an optional type system (still in development), and everything is a function, even language constructs like IF and FOR, which can be replaced and extended with your own versions.  It uses immutable semantics wherever possible to provide safe and secure threading and continuations.  There is almost no lexer/tokeniser, and no parser in the traditional sense.  Commands are fed directly into the engine to be executed.  The programs are written _backwards_. 
+It supports actors, and everything is a function, even language constructs like IF and FOR, which can be replaced and extended with your own versions.  It uses immutable semantics wherever possible to provide safe and secure threading and continuations.  There is almost no lexer/tokeniser, and no parser in the traditional sense.  Commands are fed directly into the engine to be executed.  The programs are written _backwards_. 
 
 Throff is still in development.  The basic language is complete and can be used for minor tasks e.g. text processing.  However things like errors and some programmer friendly features like arity tracking are still in progress.
 
@@ -161,7 +161,7 @@ will result in
     Hello
 
 LAMBDAs are the fundamental component of Throff.  Using the [ ] brackets always creates
-a LAMBDA, no matter the context.  There is nothing special about the IF function - 
+a LAMBDA, no matter the context.  For instance, there is nothing special about the IF function - 
 it is just a function that takes 3 LAMBDA arguments.
 
 LAMBDAs can be converted to arrays
@@ -170,6 +170,11 @@ LAMBDAs can be converted to arrays
 
 LAMBDAs can be converted to strings like this:
 
+
+    BIND my_string => STRING a_lambda
+    
+    or for CODE
+    
     BIND my_string => STRING GETFUNCTION some_function TOK
 
 
@@ -177,14 +182,13 @@ LAMBDAs can be converted to strings like this:
 
 Functions are kept as native arrays, and are created with 
 
-    -> FUNC [ ]
+    FUNC [ ]
 
-Note that because CODE is a datatype, any variable holding a function (that is,
-a CODE) immediately becomes a function, like this:
+Throff keeps track of executable code by marking the data itself, not the variable.  Because CODE is a datatype, any variable holding a a CODE immediately becomes a function, like this:
 
     a
-    BIND a => say_hello
-    DEFINE say_hello => [ PRINTLN Hello ]
+    BIND a => GETFUNCTION say_hello TOK
+    DEFINE say_hello => FUNC [ PRINTLN Hello ]
 
 will output
 
@@ -204,25 +208,28 @@ instead of 1234.
 If you want to pass functions around for higher-order programming, you will need
 LAMBDAs.  CODEs can be converted to LAMBDAs like this:
 
-    SET my_lambda = LAMBDA GETFUNCTION PRINT TOK
+    BIND my_lambda => LAMBDA GETFUNCTION PRINT TOK
 
 but by far the easiest way to do this is to wrap the function
 
-    SET my_lambda = [ PRINT ]
-    MAP [ PRINT ] [ 1 2 3 4 ]
+    MAP my_lambda [ 1 2 3 4 ]
+    BIND my_lambda = [ PRINT ]
+    
 
 This will get the PRINT function and store it in my_lambda
 
 You can call a CODE or a LAMBDA with CALL.
 
-    CALL GETFUNCTION my_lambda TOK
+    CALL GETFUNCTION PRINT TOK [ Hello ]
+    
+    CALL my_lambda
 
 
-CODEs can be converted to arrays like this:
+CODEs can be converted to arrays:
 
     BIND my_array => ARRAY GETFUNCTION some_function TOK
 
-CODEs can be converted to strings like this:
+CODEs can be converted to strings:
 
     BIND my_string => STRING GETFUNCTION some_function TOK
 
@@ -238,6 +245,8 @@ stored.  The string representing the hash will be a series of throff commands
 that will rebuild the hash when EVALed.  Key order is not guaranteed unless the
 underlying implementation provides for it.
 
+Handling nested hashes is currently too difficult, I will be redesigning this soon.
+
 ### Wrappers
 
 Wrappers manage native datastructures.  There are no guarantees or guidelines
@@ -247,13 +256,13 @@ generated code that provides access to lower-level functionality.
 Wrappers usually won't have a string representation.  If a wrapper is used as a
 string, throff will usually attempt to print the code that was used to create the wrapper, or just throw an error.
 
-Since throff uses the string representation of data as the hash key,
+Since throff uses the string representation of data as a hash key,
 wrappers should not be used as hash keys, unless you are very sure that the
 string representation exists and is meaningful.
 
 ### Bytes
 
-Bytes are a special type of wrapper, in that Throff has some built in functions for manipulating them.  Throff also provides some basic guarantees for working with bytes.  Throff will not move the bytes, so pointers into the bytes will remain valid.  However, you will need to make sure the bytes are not freed by the garbage collector by keeping a Throff binding to the bytes.
+Bytes are a special type of wrapper, because Throff has some extra in functions for manipulating them.  Throff also provides some basic guarantees for working with bytes.  Throff will not move the bytes, so pointers into the bytes will remain valid.  However, you will need to make sure the bytes are not freed by the garbage collector by keeping a Throff binding to the bytes.
 
 You can convert a throff value to bytes with ->BYTES, or make one with MMAPFILE.  You can get the length (in bytes) with LENGTH, read parts of the BYTES with GETBYTE, or set them with SETBYTE.
 
@@ -275,7 +284,7 @@ Inserts hashkeys into the current namespace
 
 Loads the requested keys from the hash and puts them in the current environment.  
 
-Updating the variables will not update the hash nor vice versa.  HASHes, like everything else in throff, are immutable.
+Updating the variables will not update the hash nor vice versa.  HASHes, like most other data types, are immutable.
 
 ##### Parameters:
 
@@ -311,6 +320,10 @@ Calls **function** n times.
 #### THREAD function
 
 Starts a new thread to run function.  A clone of the current interpreter is used for the the new thread.  Due to Throff's immutable semantics, the new thread will not be able to update values in the old thread.  However this protection does not work for anything external to the interpreter, like sockets, files or databases.  If both the old and new threads attempt to write to the same file handle, or read from the same network socket, corruption will occur.
+
+Threads cannot communicate directly with each other, you need to use something like a QUEUE, or a third party library.
+
+The ACTOR functions provide a convenient way to run a thread and communicate with other threads.
 
 ##### Parameters:
 
@@ -793,8 +806,6 @@ Returns a new array which is array1 with array2 appended to the end.
 
 Queues are thread safe FIFO queues, most useful for sending messages between threads.  All throff data types can be send through a queue, and since this will simply send a pointer, it is quick and efficient.
 
-Note that queues are mutable, so they will disable most optimisations for the scope that they are used in.  However
-
 #### NEWQUEUE -> queue
 
 	Create a new thread-safe FIFO queue
@@ -936,7 +947,7 @@ Much neater than multiple if statements, CASE provides a compact way to do multi
          DEFAULT            ... [ PRINTLN [ X IS EQUAL TO 0 ] ]
      ]A
 
-Case tests each condition (on the left).  If that condition is true, it calls the function on the right.  CASE is an expression, the result of the function is the result of the CASE.
+Case tests each condition (on the left).  If that condition is true, it calls the function on the right.  CASE is an expression, the result of the function becomes the result of the CASE.
 
     REBIND COUNT => ADD COUNT CASE A[
                                          LESSTHAN 0 X       ... -1
@@ -1135,7 +1146,7 @@ Wait for the subprocess **ProcHandle** to finish before continuing.
 
 Namespaces and scopes are still a bit wobbly in Throff, but are at the point where they function well enough to be called 'feature complete'.
 
-Manipulating them directly is usually safe, because they are /immutable/.  Or /mostly/ immutable.
+Manipulating them directly is usually safe, because they are _immutable_.  Or _mostly_ immutable.
 
 Scopes are throff hashes, and if you can get a reference to them, you can use ordinary throff hash functions on them.
 
@@ -1143,9 +1154,11 @@ Scopes are all nested, with the root scope being the initial scope that the prog
 
 The current scope is mutable but all other scopes (especially parent) are immutable, although it is not hard to find a way to modify the memory of another scope.  Doing this will not work the way you want it to, since scopes are often copied or optimised away.
 
-Almost every [ ] introduces a new scope (MACROs and THIN functions are exceptions).  This means you can't update variables inside a MAP or FOLD or FOR loop, because all the variables inside the [ ] are discarded.
+Almost every [ ] introduces a new scope (MACRO and THIN functions are exceptions).  This means you can't update variables inside a MAP or FOLD or FOR loop, because all the variables inside the [ ] are discarded.
 
 BIND creates a new variable in the current scope, and fails if the variable already exists.  REBIND either replaces a BIND, or shadows a variable in the parent scope.  Throff will throw an error if you attempt to bind a variable name that is already bound in a parent scope.
+
+#### Scoping rules
 
 There are two special types of scoping rules:  THIN and MACRO.
 
