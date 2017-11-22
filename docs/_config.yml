@@ -1,1 +1,5 @@
 theme: jekyll-theme-leap-day
+title: "Throff" 
+description: "A rather backwards programming language"
+show_downloads: true
+google_analytics: "UA-63812845-6"
