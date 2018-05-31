@@ -1145,6 +1145,48 @@ Wait for the subprocess **ProcHandle** to finish before continuing.
 
 - Summary   A summary of the process' execution, e.g. time, exit code, etc
 
+#### SUBSHELL [ command line ] -> output
+
+Runs **command line** in the default shell, and returns the output.
+
+This command works on Mac, Linux and windows, but you get whatever shell is installed, so your commands will not be cross platform.
+
+
+
+#### CMDSTDOUTSTDERR [ executable arg1 arg2 arg3 ...  ] -> Output
+
+Starts a subprocess and waits for it to finish, then returns all the programs output as a string.  Output from STDOUT and STDERR will
+be mixed together in the same way it would be printed to a screen.
+
+**executable** must be the full path to a program.  The rest of the array will be used as program arguments
+
+##### Returns
+
+- Output All the program output
+
+#### OS -> name
+
+OS returns the name of the operating system that throff was compiled for.
+
+#### MAP function array -> array
+
+FIXME
+
+#### FOLD function start array -> a value
+
+Fold works like map, it applies a function to every element of the array.  But instead of building a new array, FOLD passes the result of your function to the next
+call of **function**
+
+FIXME moar
+
+#### FOLDTREE
+
+As for fold, but works on any data structure.  It recursively visits every element of every subtree until it has called **function** on every element in the tree.
+
+#### TREEWALK
+
+Calls **function** on every leaf of the tree in turn
+
 ### NAMESPACES and SCOPES
 
 Namespaces and scopes are still a bit wobbly in Throff, but are at the point where they function well enough to be called 'feature complete'.
