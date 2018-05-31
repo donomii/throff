@@ -1177,6 +1177,8 @@ FIXME
 Fold works like map, it applies a function to every element of the array.  But instead of building a new array, FOLD passes the result of your function to the next
 call of **function**
 
+The function must work like this:  FUNC leaf accumulator
+
 FIXME moar
 
 #### FOLDTREE
