@@ -673,6 +673,10 @@ FIXME should this be returning a string?
 
 FIXME implement this
 
+Note that this function breaks Throffs immutable data structures guarantee.  Throff is, ultimately, a practical language for doing things in, and we need to be able to modify bytes in MMAPed files, and other situations.  Without making it a fully functional language, the best we can do is recommend that you only modify _BYTES_ that you are sure that no-one else has a reference to.  i.e. If you create them yourself, in the same subroutine.
+
+Note that this still breaks some throff features - you will still be able to rewind your program, but when you do, the bytes you modified will not change back.
+
 #### BYTE-LENGTH bytes
 
 FIXME implement this
@@ -807,7 +811,9 @@ Returns a new array which is array1 with array2 appended to the end.
 
 ### Queues
 
-Queues are thread safe FIFO queues, most useful for sending messages between threads.  All throff data types can be send through a queue, and since this will simply send a pointer, it is quick and efficient.
+Queues are thread safe FIFO queues, most useful for sending messages between threads.  All throff data types can be send through a queue, and since this will simply send a pointer, it is quick and efficient.  Note that because everything in Throff is immutable, you can safely send data to as many threads as you want, and never have any problems with simulataneous updates or locks or whatever. 
+
+Unless you use _SETBYTE_.  Then anything can go wrong.
 
 #### NEWQUEUE -> queue
 
