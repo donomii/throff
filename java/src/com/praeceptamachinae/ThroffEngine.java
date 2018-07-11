@@ -11,6 +11,8 @@ public class ThroffEngine implements Cloneable{
 
     public ThroffEngine() {
         this.environment = new Thingy("HASH");
+        this.environment._hashVal.put("EMIT", new Thingy("EMIT", new StepLibrary()));
+        this.environment._hashVal.put("NTEST", new Thingy("NTEST", new StepLibrary()));
         this.dataStack = new ThingyStack();
         this.dyn = new ThingyStack();
         this.codeStack = new ThingyStack();
@@ -34,7 +36,7 @@ public class ThroffEngine implements Cloneable{
                     t._id = sequenceID;
                     t._line = line;
                     t._filename = filename;
-                    tokens.stack.push(t);
+                    tokens.push(t);
                 }
             }
         }
@@ -42,10 +44,10 @@ public class ThroffEngine implements Cloneable{
     }
 
     void LoadTokens( ThingyStack s) {
-        for (Thingy elem : s.stack)  {
+        for (Thingy elem : s)  {
             elem.environment = this.environment;
-            this.lexStack.stack.push(this.environment);
-            this.codeStack.stack.push(elem);
+            this.lexStack.push(this.environment);
+            this.codeStack.push(elem);
         } //All tokens start off sharing the root environment
 
     }
@@ -64,16 +66,16 @@ public class ThroffEngine implements Cloneable{
     public ThroffEngine realStep() throws CloneNotSupportedException {
 
         //Set up engine for this step
-        Thingy lex = this.lexStack.stack.pop();
-        Thingy code = this.codeStack.stack.pop();
+        Thingy lex = this.lexStack.pop();
+        Thingy code = this.codeStack.pop();
         System.out.print(code._stringVal);
         System.out.print("\n");
         this.environment = lex;
 
         //Actually do something
-        ThroffEngine steppedEngine = code._stub.go(this, code);
+        ThroffEngine steppedEngine = code._stub.go(this, code, lex);
 
-        if (steppedEngine.codeStack.stack.isEmpty()){
+        if (steppedEngine.codeStack.isEmpty()){
             steppedEngine.running = false;
         }
         return steppedEngine;

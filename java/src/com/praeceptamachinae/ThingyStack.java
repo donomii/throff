@@ -1,10 +1,6 @@
 package com.praeceptamachinae;
 import java.util.*;
 
-public class ThingyStack {
-    public Stack<Thingy> stack;
+public class ThingyStack extends Stack<Thingy>{
 
-    public ThingyStack( ){
-    stack = new Stack<Thingy>();
-    }
 }
