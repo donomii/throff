@@ -2,6 +2,7 @@ package com.praeceptamachinae;
 import java.util.*;
 
 public class Thingy {
+    public int _intVal;
     public String tiipe;
     public String subType;
     public Thingy environment;
@@ -22,16 +23,16 @@ public class Thingy {
     public Thingy() {
     }
 
-    //Creates code of the requested type, and creates a new environment for it
+    //Creates code of the requested type. We can't create a fresh environment here, it would be infinityly recursive
     public  Thingy(String tiipe) {
         this.tiipe = tiipe;
         this._stub = new StepDefault();
-        Hashtable<String, Thingy>() environment = new Hashtable<String, Thingy>();
-        this.environment = environment;
+        //Hashtable<String, Thingy> environment = new Hashtable<String, Thingy>();
+        //this.environment = environment;
 
         if (tiipe == "BOOLEAN") {
             this.subType = "NATIVE";
-            this._intVal = new Hashtable<String, Thingy>();
+            this._intVal = 0;
         }
         if (tiipe == "HASH") {
             this.subType = "NATIVE";
@@ -55,13 +56,47 @@ public class Thingy {
         this._stub = l;
     }
 
-    //Creates code of the requested type, and uses the provided environment
-    public  Thingy(String tiipe, String contents, Thingy environment) {
 
+    public  Thingy(Hashtable<String, Thingy> hashVal) {
+        this.tiipe = "HASH";
+        this._stub = new StepDefault();
+        this.subType = "NATIVE";
+        this._hashVal = hashVal;
     }
+
+    //Creates code of the requested type, and uses the provided environment
+    public  Thingy(String tiipe, String content, Thingy environment) {
+        this.tiipe = tiipe;
+        this._stub = new StepDefault();
+        //Hashtable<String, Thingy> environment = new Hashtable<String, Thingy>();
+        this.environment = environment;
+
+        if (tiipe == "BOOLEAN") {
+            this.subType = "NATIVE";
+            this._intVal = 0;
+        }
+        if (tiipe == "HASH") {
+            this.subType = "NATIVE";
+            this._hashVal = new Hashtable<String, Thingy>();
+        }
+        if (tiipe == "TOKEN") {
+            this.subType = "NATIVE";
+            this._stringVal = content;
+        }
+        if (tiipe == "ARRAY") {
+            this.subType = "INTERPRETED";
+            this._arrayVal = new ThingyStack();
+        }
+    }
+
+
 
     @Override
     public String toString() {
         return "A Thing\nString: "+this._stringVal+"\nStub: "+this._stub+"\n";
+    }
+
+    public String getSource() {
+        return this._stringVal;
     }
 }

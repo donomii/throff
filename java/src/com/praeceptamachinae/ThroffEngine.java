@@ -8,6 +8,9 @@ public class ThroffEngine implements Cloneable{
     public  ThingyStack lexStack;
     public int sequenceID;
     public Boolean running;
+    public int _prevLevel;
+    public int _funcLevel;
+    public int _line;
 
     public ThroffEngine() {
         this.environment = new Thingy("HASH");
@@ -32,7 +35,7 @@ public class ThroffEngine implements Cloneable{
                 if (str == "LINEBREAKHERE") {
                     line = line + 1;
                 } else {
-                    Thingy t = new Thingy(str, new Thingy("HASH")); //value, environment
+                    Thingy t = new Thingy("TOKEN", str, new Thingy("HASH")); //value, environment
                     t._id = sequenceID;
                     t._line = line;
                     t._filename = filename;
