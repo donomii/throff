@@ -1,4 +1,8 @@
-[ ]		ITERATE [ PRINTLN
-			A[ X PLURAL X bottle of beer on the wall, X PLURAL X bottle of beer.  Take one down, pass it round, SUB X 1 PLURAL SUB X 1 bottle of beer on the wall. ]A
-			: X  
-		] REVERSE RANGE 1 99
+[ ]	ITERATE [ PRINTLN
+			A[ X plural A[ bottle X ]A of beer on the wall, X plural A[  bottle X ]A of beer.  Take one down, pass it round, SUB X 1 plural A[ bottle SUB X 1 ]A  of beer on the wall. ]A
+			: X ADD1 
+		] REVERSE IOTA 100
+
+DEFINE plural => func [ word number ] [
+IF EQUAL number 1 [ word ] [ STRING-CONCATENATE word s ]
+]

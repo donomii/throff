@@ -1181,6 +1181,11 @@ FIXME
 #### FOLD function start array -> a value
 
 Fold works like map, it applies a function to every element of the array.  But instead of building a new array, FOLD passes the result of your function to the next
+
+FOLD [ MULT elem accum ] start array
+
+Here FOLD will multiply start by the first element of your array, then takes the results of that (the accumulator) and multiplies it with the second element of your array, and so on.
+
 call of **function**
 
 The function must work like this:  FUNC leaf accumulator

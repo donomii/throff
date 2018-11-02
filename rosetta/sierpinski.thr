@@ -18,11 +18,102 @@ DEFINE SIERPINSKI => [
 	ARG N =>
 ]
 
+EXIT
+PRINTLN r1
+BIND r1 => nextRows A[ [ * ] 4 ]A
+PRINTLN [ Starting sierpinski ]
+DEFINE  func nextRows => func [ row count ] [
+        IF LESSTHAN 0 count [
+            APPEND A[ PADDING row CRLF ]A nextRows A[ newRow SUB1 count ]A
+            PRINTLN [ recurse ]
+        ]
+        [ A[ ]A PRINTLN [ base case ] ]
 
-		
-DEFINE REVERSE => [
-	NEW
-	ITERATE THIN [ REBIND NEW => UNSHIFTARRAY SWAP NEW ] OLD
-	BIND NEW => NEWARRAY
-	ARG OLD =>
+
+        PRINTLN A[ [ newrow: ] newRow ]A
+        BIND newRow => STRING-CONCATENATE MAP [ SPACE DROP ] IOTA SUB1 count STRING-JOIN SPACE A[ row row ]A
+        BIND PADDING => MAP [ SPACE DROP ] RANGE 1 count
+        PRINTLN A[ [ row: ]  row [ count: ] count ]A 
 ]
+
+NAMETESTBLOCK [ power function ] [
+TEST 8 pow [ 2 3 ] [ 2^3 ]
+TEST 4 pow [ 2 2 ] [ 2^2 ]
+TEST 2 pow [ 2 1 ] [ 2^1 ]
+TEST 1 pow [ 2 0 ] [ 2^0 ]
+]
+
+PRINTLN pow A[ 2 2 ]A
+
+DEFINE func pow => [ base exponent ] [
+    FOLD [ MULT base DROP ] 1 RANGE 1 exponent
+]
+
+
+NAMETESTBLOCK [ Testing func definition ] [
+
+	TEST 0 t_add [ ] [ Add empty list ]
+
+	TEST 25 t_add [ 3 4 5 6 7 ] [ Add many numbers ]
+
+	TEST 6  tf  [ 1 2 3 ] [ Test function with automatic args ]
+
+	DEFINE t_add => varfunc [ ] [ FOLD [ ADD ] 0 params ]
+
+	DEFINE func tf => [ a b c ] [  ADD a ADD b c ]
+    countDown A[ 5 ]A
+    DEFINE func countDown => [ count ] [ WHEN LESSTHAN 0 count [ countDown A[ SUB1 count ]A PRINTLN A[ [ coundown: ]  count ]A ]  ]
+]
+
+DEFINE varfunc => [
+
+		LAMBDA [
+			CALL newF
+
+
+			BIND newF => SETENV f newEnv
+			BIND newEnv => SETHASH params TOK params env
+
+		ARG params => ]
+
+	BIND env => ENVIRONMENTOF f
+
+ARG f => ARG args => ]
+
+
+
+DEFINE func =>  [
+
+	 name LAMBDA [
+			CALL newF
+
+
+			BIND newF => SETENV f newEnv
+			BIND newEnv => SETHASH name ->CODE thisFunc FOLD [ SETHASH
+										GETARRAY i args
+										GETARRAY i params
+										accum
+										ARG accum => ARG i => ] env  IOTA LENGTH args
+
+			WHEN NOT EQUAL   LENGTH params  LENGTH args [ THROW [ Argument length mismatch! ] ]
+
+			ARG params => ARG thisFunc => ->LAMBDA LASTFUNC ]
+
+		BIND env => ENVIRONMENTOF f
+
+	ARG f => ARG args => ->ARRAY ARG name => ->STRING ]
+
+
+COMMENT [
+EXIT
+testlast
+
+DEFINE testlast => [
+f
+PRINTLN [ woohoo ]
+BIND f => LASTFUNC
+]
+
+]
+
+SAFETYON
