@@ -4,7 +4,7 @@ import "github.com/donomii/throfflib"
 
 import (
 	"fmt"
-	_ "net/http/pprof"
+	//_ "net/http/pprof"
 	"os"
 )
 
