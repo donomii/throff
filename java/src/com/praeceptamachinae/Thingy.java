@@ -23,6 +23,14 @@ public class Thingy {
     public Thingy() {
     }
 
+    public  Thingy(String tiipe, String something, Stepper stepFunc) {
+        this.tiipe = tiipe;
+        this._stub = stepFunc;
+        //Hashtable<String, Thingy> environment = new Hashtable<String, Thingy>();
+        //this.environment = environment;
+
+    }
+    //
     //Creates code of the requested type. We can't create a fresh environment here, it would be infinityly recursive
     public  Thingy(String tiipe) {
         this.tiipe = tiipe;
@@ -93,7 +101,7 @@ public class Thingy {
 
     @Override
     public String toString() {
-        return "A Thing\nString: "+this._stringVal+"\nStub: "+this._stub+"\n";
+        return "===Thing dump===\nString: '"+this._stringVal+"'\nArray: "+this._arrayVal+"\nStub: "+this._stub+"\n===End thing dump===\n";
     }
 
     public String getSource() {

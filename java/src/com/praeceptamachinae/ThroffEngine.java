@@ -1,6 +1,6 @@
 package com.praeceptamachinae;
 
-public class ThroffEngine implements Cloneable{
+public class ThroffEngine implements Cloneable {
     public  Thingy environment;
     public  ThingyStack dataStack;
     public  ThingyStack dyn;
@@ -23,6 +23,21 @@ public class ThroffEngine implements Cloneable{
         this.sequenceID = 0;
         this.running = false;
     }
+
+    public void dump () {
+	    System.out.print(
+			    "=======================Engine Dump==================\n" +
+		"Running:" + this.running + "\n" +
+		"Line:" + this._line + "\n" +
+		"Function Level:" + this._funcLevel + "\n" +
+		"Sequence ID:" + this.sequenceID + "\n" +
+		"Data Stack:" + this.dataStack + "\n" +
+		"Code Stack:" + this.codeStack + "\n"
+			    );
+	
+    }
+
+
     public ThingyStack tokenise(String s, String filename) {
         int line = 0;
         s = s.replace("\n", "LINEBREAKHERE");
@@ -61,7 +76,8 @@ public class ThroffEngine implements Cloneable{
         ThroffEngine estep = this;
         estep.running = true;
         while (estep.running) {
-            estep = this.Step();
+            estep = estep.Step();
+	    System.out.print("end of step with function level: "+ Integer.toString(estep._funcLevel)+"\n");
         }
         return estep;
     }
@@ -85,12 +101,20 @@ public class ThroffEngine implements Cloneable{
     }
 
     public ThroffEngine Step() throws CloneNotSupportedException {
+        System.out.print("Cloning engine with function level: "+ Integer.toString(this._funcLevel)+"\n");
         ThroffEngine engine = (ThroffEngine ) this.clone();
+        System.out.print("New engine has function level: "+ Integer.toString(engine._funcLevel)+"\n");
         return engine.realStep();
     }
 
-    protected Object clone() throws CloneNotSupportedException {
+    public Object clone()  {
+	    try {
         return super.clone();
+	    } catch (CloneNotSupportedException e) {
+		    System.out.print("Couldn't clone engine");
+		System.exit(1);
+	    }
+	    return new ThroffEngine();
     }
 
 }
