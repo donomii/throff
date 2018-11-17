@@ -1,3 +1,4 @@
-
+*.class
 throff
+throff.exe
 .idea
