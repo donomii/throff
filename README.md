@@ -14,28 +14,36 @@ the Throff programming language
 
 ## Use it
 
-### Run-and-quit
+### Run from Command Line
 
-	throff ADD 1 1
+	> throff ADD 1 1
 	2
 
 ### Interactive shell
 
 	> throff
 	Welcome to the THROFF command shell v0.1. Type HELP for help.
-	Throff »
+	Throff »ADD 1 1
+	2
 
-### Run a program
+### Run a program in a file
 
 	throff -f properdiv.thr
 
+### Scripting interface for golang
+
+``` golang
+	result, _ := t.CallArgs1("ADD", 4, "5")
+	fmt.Println("Calculation result: ", result)
+```
+
 ## Throff is
 
-Throff is a dynamically typed, late binding, homoiconic, concatenative programming language, taking inspiration from Forth and Joy.  It has all the features of a modern language - [closures, lexical scopes](http://praeceptamachinae.com/post/throff_variables.html), [tail call optimisations](http://praeceptamachinae.com/post/throff_tail_call_optimisation.html), currying, and continuations.
+Throff is a dynamically typed, late binding, homoiconic, concatenative programming language, taking inspiration from Forth, Joy and Scheme.  It has all the features of a modern language - [closures, lexical scopes](http://praeceptamachinae.com/post/throff_variables.html), [tail call optimisations](http://praeceptamachinae.com/post/throff_tail_call_optimisation.html), currying, and continuations.
 
 It supports actors, and everything is a function, even language constructs like IF and FOR, which can be replaced and extended with your own versions.  It uses immutable semantics wherever possible to provide safe and secure threading and continuations.  There is almost no lexer/tokeniser, and no parser in the traditional sense.  Commands are fed directly into the engine to be executed.  The programs are written _backwards_. 
 
-Throff is still in development.  The basic language is complete and can be used for minor tasks e.g. text processing.  However things like errors and some programmer friendly features like arity tracking are still in progress.
+Throff is still in development.  The basic language is complete and can be used for minor tasks e.g. text processing.  However some more programmer friendy features are still in development.
 
 ## Program flow
 
@@ -61,7 +69,7 @@ will call .S before calling ADD.  .S prints the arguments to its right (i.e. the
 * To create a small, simple and portable interpreter (mostly complete)
 * To design a language that builds itself from basic principles to advanced language constructs (going nicely)
 * quick and effective access to platform libraries like graphics, databases, etc (not so good)
-* a simple and highly configurable language (good so far)
+* a simple and highly configurable language (good)
 * the best interactive debugger, with rewind and undo functionality (possible but not implemented well)
 * Support advanced language features like first-class continuations (mostly complete)
 * a familiar interface available everywhere
@@ -90,7 +98,7 @@ Note that under the hood,  arrays, lambdas and codes are almost the same thing, 
 
 Throff is homoiconic, which in this case also means that all its data structures have explicit string representations.  Every Throff data structure can be used as a string.  So a simple way to compare nested arrays is to compare their string representations:
 
-    EQUAL 	->STRING ARRAY1		->STRING ARRAY2
+    EQUAL ->STRING ARRAY1 ->STRING ARRAY2
 
 hashes work in a similar manner.
 
@@ -106,16 +114,16 @@ FIXME rename "symbol representation" to something less confusing.
 
 ### Boolean
 
-Booleans are created with TRUE, FALSE and EQUAL.  They are only used by the IF function, and the usual logical functions.
+Booleans are created with TRUE, FALSE and EQUAL.  They are only used by the IF function, and the usual logical functions like AND and OR.
 
 ### Strings and Tokens
 
-Strings and tokens are treated exactly the same, except that strings require quotes around them, and tokens are printed raw.  This matters when trying to print out a data structure (or code) to be evaluated later. Tokens are usually created by the parser, usually for function names etc, while strings are created from TOKENs or directly by reading from a socket or file.
+Strings and tokens are treated exactly the same, except when they are being printed out.  This matters when trying to print out a data structure (or code) to be evaluated later, because throff will try to print something that will re-create the data structure. Tokens are usually created by the parser, and are used for function names and variable names, while strings are created from TOKENs or directly by reading from a socket or file.
 
 Almost everything in throff has a string representation, and wherever possible,
 throff acts on strings and strings alone.  Every datatype except WRAPPER may be
 coerced into a STRING with ->STRING, or by using a function that expects a string, like
-PRINT or STRING-JOIN.
+PRINT or STRING-JOIN.  Numbers are kept as strings, and are converted to numbers at the last moment before use.
 
 ### Variable lookup
 
@@ -166,6 +174,8 @@ will result in
 LAMBDAs are the fundamental component of Throff.  Using the [ ] brackets always creates
 a LAMBDA, no matter the context.  For instance, there is nothing special about the IF function - 
 it is just a function that takes 3 LAMBDA arguments.
+
+	IF [ true ] THEN [ PRINTLN yay ] ELSE [ PRINTLN boo ]
 
 LAMBDAs can be converted to arrays
 
@@ -275,14 +285,31 @@ You can convert a throff value to bytes with ->BYTES, or make one with MMAPFILE.
 
 THIN converts a function into a THIN function, which has no private lexical environment - it shares its parents' lexical scope.
 
+THIN functions are mostly used for forcing throff to act a bit more like an imperative language:
+
+	PRINTLN x
+	WHEN true [ REBIND x => 5 ]
+	BIND x => 1
+
+will print "1"
+
+	PRINTLN x
+	WHEN true THIN [ REBIND x => 5 ]
+	BIND x => 1
+
+will print "1"
+
 #### MACRO function
 
 MACRO converts a function into a MACRO.  MACROs have no lexical environment at all - they use the same environment as the caller (dynamic scope).
+
+Macros are heavily used to provide new langauge features in throff.  For instance, the ```WITH array FROM hash``` is implemented with a macro.  For many examples of macro use, look in throffbootstrap.go
 
 #### WITH array FROM hash
 
 Inserts hashkeys into the current namespace
 
+	PRINTLN a
 	WITH [ a b c ] FROM H[ a 1 b 2 c 3 ]H
 
 Loads the requested keys from the hash and puts them in the current environment.  
@@ -300,7 +327,7 @@ Updating the variables will not update the hash nor vice versa.  HASHes, like mo
 
 is equivalent to
 
-	DEFINE ips 	=> GETHASH ips http_requests
+	DEFINE ips   => GETHASH ips http_requests
 	DEFINE dates => GETHASH dates http_requests
 	DEFINE paths => GETHASH paths http_requests
 
@@ -322,7 +349,7 @@ Calls **function** n times.
 
 #### THREAD function
 
-Starts a new thread to run function.  A clone of the current interpreter is used for the the new thread.  Due to Throff's immutable semantics, the new thread will not be able to update values in the old thread.  However this protection does not work for anything external to the interpreter, like sockets, files or databases.  If both the old and new threads attempt to write to the same file handle, or read from the same network socket, corruption will occur.
+Starts a new thread to run **function**.  A clone of the current interpreter is used for the the new thread.  Due to Throff's immutable semantics, the new thread will not be able to update values in the old thread.  However this protection does not work for anything external to the interpreter, like sockets, files or databases.  If both the old and new threads attempt to write to the same file handle, or read from the same network socket, corruption will occur.
 
 Threads cannot communicate directly with each other, you need to use something like a QUEUE, or a third party library.
 
@@ -424,6 +451,8 @@ or you can use GETFUNCTION to safely get the value of aFunc
 ##### Description
 
 	Bindings are almost immutable - you can only modify bindings in your current scope.  Read the Scoping section for more details.
+
+	Once you return from your current scope, the bindings are thrown away.
 
 #### REBIND name => new value
 
