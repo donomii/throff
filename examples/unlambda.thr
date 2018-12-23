@@ -1,0 +1,21 @@
+COMMENT [ An attempt to directly translate the unlambda language into throff.  It didn't work due to different calling conventions ]
+CALL unlambda
+ SETENV unlambda BASICNAMESPACE
+ BIND unlambda => [
+
+
+ ` nl ` ` ` ` ` ` ` ` ` ` . H . e . l . l . o . w . o . r . l . d i
+
+
+PRINTLN  ` i Starting_hello_world
+
+BIND d => [ d ] 
+BIND * => [ * ]
+BIND nl => [ PRINTLN [ ] ]
+DEFINE . => [ [ EMIT X ] ARG X => ]
+BIND v => [ v DROP ]
+BIND i => [ ` ` s k k ]
+BIND k => [ DROP SWAP ]
+BIND s => [ ` ` X Z ` Y Z  ARG Z => ARG Y => ARG X => ]
+DEFINE ` => [ CALL ]
+]

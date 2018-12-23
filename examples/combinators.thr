@@ -1,0 +1,26 @@
+COMMENT [ Let's see how far we can get implementing classic combinators and building up to something useful 
+
+
+TEST CALL I 3  CALL CALL S K K 3 [ Testing SKK ]
+TEST 1 ` ` ` cons 1 2 car      [ cons car ]
+]
+
+PRINTLN ` cons 1 2
+
+COMMENT [ : I => [ x ARG x => ]  ]
+: I => [ CALL CALL CALL S K K ]
+: K => [ x ARG y => ARG x => ]
+: S => [ CALL [ CALL [ CALL CALL x z CALL y z ARG z =>  ] ARG y => ] ARG x => ]
+: B => [ CALL x CALL y z ARG z => ARG y => ARG x => ]
+: Y => [ CALL CALL [ CALL b b  ARG b => ] CALL [ CALL a [   CALL CALL b c ARG c => ]  ARG b => ]   ARG a => ]
+: V => [ CALL CALL c a b ARG c => ARG b => ARG a => ]
+: T => [ CALL  b a ARG b => ARG a => ]
+
+: cons => [  CALL CALL V a b c ARG c =>  ARG b => ARG a => ]
+: car => [ CALL T K  ]
+: cdr => [ CALL T K  ]
+
+
+
+DEFINE <= => [ ARG ]
+DEFINE ` => [ CALL ]
