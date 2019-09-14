@@ -118,7 +118,7 @@ Booleans are created with TRUE, FALSE and EQUAL.  They are only used by the IF f
 
 ### Strings and Tokens
 
-Strings and tokens are treated exactly the same, except when they are being printed out.  This matters when trying to print out a data structure (or code) to be evaluated later, because throff will try to print something that will re-create the data structure. Tokens are usually created by the parser, and are used for function names and variable names, while strings are created from TOKENs or directly by reading from a socket or file.
+Strings and tokens are treated exactly the same, except when they are being printed out.  This matters when trying to print out a data structure (or code) to be evaluated later.  Throff will print strings exactly as they are, without quotes or escapes.   Throff will try to print tokens as something that will re-create the data structure, including surrounding quotes if needed. Tokens are usually created by the parser, and are used for function names and variable names, while strings are created from TOKENs or directly by reading from a socket or file.
 
 Almost everything in throff has a string representation, and wherever possible,
 throff acts on strings and strings alone.  Every datatype except WRAPPER may be
@@ -420,7 +420,7 @@ or you can use GETFUNCTION to safely get the value of aFunc
 
 #### ARG name =>
 
-	ARG binds a function argument to **name**.  It is currently an alias to BIND.
+ARG binds a function argument to **name**.  It is currently an alias to BIND.
 
 ##### Example:
 
@@ -434,13 +434,13 @@ or you can use GETFUNCTION to safely get the value of aFunc
 
 	> Hello Bob
 
-	See Also:
+See Also:
 
 	DEFINE, BIND, REBIND
 
 #### BIND name => value
 
-	Variables are created with the BIND command.
+Variables are created with the BIND command.
 
 
 	PRINTLN x
@@ -450,13 +450,13 @@ or you can use GETFUNCTION to safely get the value of aFunc
 
 ##### Description
 
-	Bindings are almost immutable - you can only modify bindings in your current scope.  Read the Scoping section for more details.
+Bindings are almost immutable - you can only modify bindings in your current scope.  Read the Scoping section for more details.
 
-	Once you return from your current scope, the bindings are thrown away.
+Once you return from your current scope, the bindings are thrown away.
 
 #### REBIND name => new value
 
-	Overwrites an existing binding
+Overwrites an existing binding
 
 ##### Example
 
@@ -464,18 +464,18 @@ or you can use GETFUNCTION to safely get the value of aFunc
 
 ##### Description
 
-	The variable must have been created already with BIND, before it can be rebound
+The variable must have been created already with BIND, before it can be rebound
 
-	Note that no matter what happens, the change is only visible inside the current (and lower) scope.
+Note that no matter what happens, the change is only visible inside the current (and lower) scope.
 
 
-#### TOK
+#### TOK token -> token
 
-	TOK quotes the word to its left
+TOK (token) quotes the word to its left
 
 	PRINTLN TOK
 
-	Out of all the functions in Throff, TOK is the only function that can affect anything to the left.  TOK is used to quote function and variable names, preventing them from being resolved to their values. => and = are aliased to TOK, and thus quote the variable name to their left.  This is how you can assign to variable names, without the variable resolving to its stored value.
+Out of all the functions in Throff, TOK is the only function that can affect anything to the left.  TOK is used to quote function and variable names, preventing them from being resolved to their values. => and = are aliased to TOK, and thus quote the variable name to their left.  This is how you can assign to a variable, without the variable name being replaced with its value.
 
 ##### Example:
 
@@ -483,25 +483,25 @@ or you can use GETFUNCTION to safely get the value of aFunc
 
 	Stack top: PRINTLN
 
-	Instead of printing TOK, TOK pushes the TOKEN "PRINTLN" onto the stack.
+Instead of printing TOK, TOK pushes the TOKEN "PRINTLN" onto the stack.
 
 ##### Description:
 
-	While Throff is bootstrapping, TOK is used to quote function names when they are being defined.
+While Throff is bootstrapping, TOK is used to quote function names when they are being defined.
 
 	DEFINE TRUE TOK [ EQUAL 1 1 ]
 
-	TOK is useful when you want to retrieve a function value.  If you just use the function name, it will activate.  So if you try to rename PRINTLN
+TOK is useful when you want to retrieve a function value.  If you just use the function name, it will activate.  So if you try to rename PRINTLN
 
 	DEFINE printline => PRINTLN
 
 	> ERROR: read past end of stack
 
-	it will fail because PRINTLN will activate.  To get the function behind PRINTLN
+it will fail because PRINTLN will activate.  To get the function behind PRINTLN
 
 	DEFINE printline => GETFUNCTION PRINTLN TOK
 	
-	Note that => is just syntactic sugar for TOK, as are several other symbols I can't recall right now.
+Note that => is just syntactic sugar for TOK, as are several other symbols I can't recall right now.
 
 ##### See Also:
 
@@ -509,11 +509,11 @@ or you can use GETFUNCTION to safely get the value of aFunc
 
 #### CALL function
 
-	Calls a function or a lambda
+Calls a function or a lambda, or activates a **PROMISE**.
 
-	Call activates a lambda function, which are built with [ ] or fetched with GETFUNCTION
+Call activates a lambda function, which are built with [ ] or fetched with GETFUNCTION
 
-	Example:
+Example:
 
 	CALL [ PRINTLN [ Hello World ] ]
 	CALL GETFUNCTION PRINTLN TOK [ Hello World ]
@@ -522,44 +522,44 @@ or you can use GETFUNCTION to safely get the value of aFunc
 
 	CALL myHello
 
-	See Also:
+See Also:
 
 	GETFUNCTION
 
 #### ->LAMBDA
 
-	Converts a CODE into a LAMBDA
+Converts a CODE into a LAMBDA
 
 
 FIXME move this discussion to another page
 
-	All Throff functions are of type CODE.  Any variable containing a CODE becomes a function, and will activate any time the variable name appears.  This makes function arguments difficult to deal with, because if someone passes your function a CODE, each time you refer to that CODE, you will need to write
+All Throff functions are of type CODE.  Any variable containing a CODE becomes a function, and will activate any time the variable name appears.  This makes function arguments difficult to deal with, because if someone passes your function a CODE, each time you refer to that CODE, you will need to write
 
 	GETFUNCTION argname TOK
 
-	this is too much typing and too easy to forget, so instead you should convert the CODEs to LAMBDAs.  Lambdas are identical to CODE in every way, except that to activate them, you need to use CALL
+this is too much typing and too easy to forget, so instead you should convert the CODEs to LAMBDAs.  Lambdas are identical to CODE in every way, except that to activate them, you need to use CALL
 
-	Internally throff examines each word of the program in turn.  If the word is of type CODE, throff activates it immediately.  If the word is of type LAMBDA, throff pushes it onto the stack.
+Internally throff examines each word of the program in turn.  If the word is of type CODE, throff activates it immediately.  If the word is of type LAMBDA, throff pushes it onto the stack.
 
-	Example:
+Example:
 
 	CALL myHello
 
-	See Also:
+See Also:
 
 	GETFUNCTION
 
 #### ->STRING
 
-	Converts anything into a STRING.
+Converts anything into a STRING.
 
-	In Throff, almost everything has a string representation.  The only exceptions are WRAPPERs around internal data structures, and where possible, these will have some kind of descriptive string.  ->STRING will build the string representation of a data structure recursively, so calling it on a HASH or ARRAY might result in a very large string.
+In Throff, almost everything has a string representation.  The only exceptions are WRAPPERs around internal data structures, and even then, these will have some kind of descriptive string.  ->STRING will build the string representation of a data structure recursively, so calling it on a HASH or ARRAY might result in a very large string.
 
 #### ->ARRAY
 
-	Converts a CODE or LAMBDA into an ARRAY
+Converts a CODE or LAMBDA into an ARRAY
 
-	CODEs, LAMBDAs and ARRAYs use the same internal data structure, and so can be used almost interchangably.  The only difference is how the interpreter treats them at certain times, and CODE/LAMBDAs have a lexical environment.  
+CODEs, LAMBDAs and ARRAYs use the same internal data structure, and so can be used almost interchangably.  The only difference is how the interpreter treats them at certain times, and CODE/LAMBDAs have a lexical environment.  
 
 ##### Example
 
@@ -573,86 +573,86 @@ FIXME move this discussion to another page
 
 ### Math Functions
 
-#### FLOOR number
+#### FLOOR number -> number
 
 	Discards everything to the right of the decimal point
 	
 
-#### ADD number number
+#### ADD number number -> number
 
-	Adds two numbers
+Adds two numbers
 
-	Example
+Example
 
 	ADD 2 3
 
-#### SUB number number
+#### SUB number number -> number
 
-	Subtract two numbers
+Subtract two numbers
 
-	Example
+Example
 
 	SUB 5 3
 
-#### MULT number number
+#### MULT number number -> number
 
-	Multiplies two numbers
+Multiplies two numbers
 
-	Example
+Example
 
 	MULT 3 4
 
-#### DIVIDE number number
+#### DIVIDE number number -> number
 
-	Divides two numbers
+Divides two numbers
 
-	Example
+Example
 
 	DIVIDE 10 9
 
-#### MODULO number number
+#### MODULO number number -> number
 
-	Returns a modulo b
+Returns a modulo b
 
-	Example
+Example
 
 	MODULO 100000 3
 
-#### LN number
+#### LN number -> number
 
-	Natural logarithm
+Natural logarithm
 	
-#### SIN number
+#### SIN number -> number
 
-	Sine (radiians)
+Sine (radiians)
 
 ### String functions
 
-#### GETSTRING n astring
+#### GETSTRING n astring -> string
 
-Gets the *n*th letter of *astring*
+Gets the *n*th letter of *astring*.  The returned value is a one letter string, there is no **character** type in Throff.
 
-#### SETSTRING n letter string
+#### SETSTRING n letter string -> string2
 
-Sets the *n*th *letter* of *string*
+Sets the *n*th *letter* of *string*, returns a new string containing the changes.  The old string is untouched.
 
-#### SLICE-STRING start end string
+#### SLICE-STRING start end string -> string
 
-Extracts and returns a substring of *string*, from *start* to *end*
+Extracts and returns a substring of *string*, from *start* to *end*.  Note that the returned string might still be part of the original string.
 
-#### STRING-CONCATENTE s1 s2
+#### STRING-CONCATENTE string1 string2 -> string3
 
 Returns a new string, which is s1 with s2 appended
 
-#### STRING-JOIN separator array
+#### STRING-JOIN separator array -> string
 
 Combines *array* into a single string, with *separator* placed between each element of *array*.
 
-#### STRING-CONCATENTE* array
+#### STRING-CONCATENTE* array -> string
 
 Returns a new string, which is all the elements of **array** concatenated together.
 
-#### STRING-JOIN string array
+#### STRING-JOIN string array -> string
 
 Returns a new string, which is made of all the elements of **array** with **string** in between each element
 
@@ -662,7 +662,7 @@ Example
 
     > HELLO,WORLD
 
-#### PLURAL number string
+#### PLURAL number string -> string
 
 Pluralises **string** by adding an s to the end if **number** is not equal to one.
 
@@ -672,7 +672,7 @@ Example
 
     > 99 bottles of beer
 
-#### RUNSTRING string environment
+#### RUNSTRING string environment -> anything
 
 Evaluates *string* inside *environment*.  You can get an environment from almost any throff type (except macros) using ENVIRONMENTOF.
 
@@ -716,53 +716,53 @@ FIXME implement this
 
 #### NEWARRAY
 
-	Create an empty new array
+Create an empty new array
 	
-	Note: You can also use the literal
+Note: You can also use the literal
 
 	A[ ]A
 
 #### ARRAYPUSH array item
 
-	Pushes item onto the end of array.  Returns the new array
+Pushes item onto the end of array.  Returns the new array
 
-	Example
+Example
 
 	REBIND myArray => ARRAYPUSH myArray [ hello ]
 
 #### POPARRAY array
 
-	Pops an item off the end of the array
+Pops an item off the end of the array
 
-	Returns
-		item 	- the popped item
-		array	- the new array, missing the final item
+Returns
+	item 	- the popped item
+	array	- the new array, missing the final item
 
-	Example
+Example
 
 	REBIND myArray => REBIND dataItem => POPARRAY myArray
 
-	Description
+Description
 
 	POPARRAY returns two values: the item from the end of the array, and a new array, missing the final item. The original array is not affected!
 
-#### SHIFTARRAY array
+#### SHIFTARRAY array -> thing
 
-	As for POPARRAY, but the other end
+As for POPARRAY, but the other end
 
-#### UNSHIFTARRAY item array
+#### UNSHIFTARRAY item array -> array
 
-	As for pusharray, but the other end
+As for pusharray, but the other end
 
-#### GETARRAY index array
+#### GETARRAY index array -> thing
 
-	Returns the item in array at position index
+Returns the item in array at position index
 
-	Example
+Example
 
 	BIND 3rdItem => GETARRAY 2 myArray
 
-#### EMPTY? array
+#### EMPTY? array -> boolean
 
 Returns true if **array** has no elements.
 
@@ -770,15 +770,15 @@ Returns true if **array** has no elements.
 
     Returns a reversed copy of **array**
 
-#### CAR array
+#### CAR array -> thing
 
 Returns the first element of **array**
 
-#### CDR array
+#### CDR array -> array
 
 Returns a copy of **array**, with the first element removed
 
-#### APPEND array1 array2
+#### APPEND array1 array2 -> array3
 
 Returns a new array which is array1 with array2 appended to the end.
 
@@ -787,11 +787,11 @@ Returns a new array which is array1 with array2 appended to the end.
 
 #### NEWHASH
 
-	Create a new hash
+Create a new hash
 	
-	Note: you can use the literal
+Note: you can use the literal
 
-	H[ ]H
+	H[ key value key value]H
 
 #### HASHSET hash key value -> hash
 
@@ -802,27 +802,28 @@ Returns a new array which is array1 with array2 appended to the end.
 
 #### SETHASH key value hash -> hash
 
-	Sets **key** to **value**
+Sets **key** to **value**
 
 ##### Returns
-		hash	- a new hash.  The old hash is unmodified
+	hash	- a new hash.  The old hash is unmodified
 
 #### KEYS hash -> array
 
 ##### Returns
-		array	- the keys of the hash as an array
+	array	- the keys of the hash as an array
 
 #### VALUES hash
 
 ##### Returns
-		array	- The values of the hash, as an array
+	array	- The values of the hash, as an array
 
 #### KEYVALS hash -> array
 
 ##### Returns
-		array	- The keys and values "flattened" into an array
 
-	Example
+array	- The keys and values "flattened" into an array
+
+Example
 
 	KEYVALS H[ A 1 B 2 C 3 ]H
 
@@ -830,9 +831,9 @@ Returns a new array which is array1 with array2 appended to the end.
 
 #### KEYS/VALS -> array, array
 
-	Returns
-		array	KEYS hash
-		array	VALUES hash
+Returns
+	array	KEYS hash
+	array	VALUES hash
 
 #### HASHDELETE hash key
 
@@ -862,20 +863,20 @@ Unless you use _SETBYTE_.  Then anything can go wrong.
 ### Network
 
 
-#### GETWWW url
+#### GETWWW url -> string
 
-	Fetch webpage
+Fetch webpage
 
-	Returns
-		string	- webpage
+Returns
+	string	- webpage
 		
 
 #### DNS.HOST hostname
 
-	Lookup hostname in the DNS system
+Lookup hostname in the DNS system
 
-	Returns
-		array	- IP addresses
+Returns
+	array	- IP addresses
 		
 
 #### DNS.CNAME hostname
@@ -1205,21 +1206,24 @@ OS returns the name of the operating system that throff was compiled for.
 
 #### MAP function array -> array
 
-FIXME
+Map is the usual as found in functional languages - it calls function on each element of the input array, and builds an array of the results.
+
+Use **ITERATE** if you do not plan to use the results, it consumes less memory.
 
 #### FOLD function start array -> a value
 
-Fold works like map, it applies a function to every element of the array.  But instead of building a new array, FOLD passes the result of your function to the next
+Fold works like map, it applies a function to every element of the array.  But instead of building a new array, FOLD passes the result of your function as input to the next step.
 
-FOLD [ MULT elem accum ] start array
+	FOLD [ MULT elem accum ] start array
 
 Here FOLD will multiply start by the first element of your array, then takes the results of that (the accumulator) and multiplies it with the second element of your array, and so on.
 
-call of **function**
+ **function**
 
-The function must work like this:  FUNC leaf accumulator
+The function must work like this:  
 
-FIXME moar
+	FUNC element accumulator
+
 
 #### FOLDTREE
 
@@ -1253,20 +1257,19 @@ MACROs have no scope when they are defined, they temporarily gain one when they 
 
 THIN functions are probably a bad idea.  THIN functions use their parent scope, and not their own, when they run.  This does allow you to update variables from inside a FOR loop, but it is a very bad idea in general, since, among other things, it prevents any optimisation of that scope.
 
-SETLEX name value
+#### SETLEX name value
 
 Sets the variable *name* to *value*.  *name* must already exist as a variable.  Better to use BIND (TODO delete SETLEX?)
 
-SCRUBLEX name
+#### SCRUBLEX name
 
 Deletes variable *name*.  *name* must already exist.
 
-GETLEX name
+#### GETLEX name -> thing
 
 Looks up the value of *name* using the current scope.
 
-: name value
+#### : name value
 
-Creates binding *name* and sets its value to *value*.  Fails if *name* alredy exists.
+Creates binding *name* and sets its value to *value*.  Fails if *name* alredy exists.  This is the fundamental way to define functions and variables.  But it lacks any type or error checking, so it is better to use **DEFINE** or **BIND**.
 
-(Also known as BIND)
