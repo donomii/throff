@@ -20,7 +20,7 @@ func main() {
 	t = t.RunString(throfflib.BootStrapString(), "Internal Bootstrap")
 
 	if len(strs) == 0 {
-		t = t.RunString("PRINTLN [ Welcome to the THROFF command shell v0.1.  Type HELP for help. ]", "repl")
+		t = t.RunString("PRINTLN [ Welcome to the THROFF REPL v0.1.  Type HELP for help. ]", "repl")
 		throfflib.Repl(t)
 	} else {
 
