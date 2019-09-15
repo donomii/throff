@@ -318,13 +318,13 @@ Updating the variables will not update the hash nor vice versa.  HASHes, like mo
 
 ##### Example
 
-	WITH [ ips dates paths ] FROM http_requests
+	WITH [ headers cookies body ] FROM http_request
 
 is equivalent to
 
-	DEFINE ips   => GETHASH ips http_requests
-	DEFINE dates => GETHASH dates http_requests
-	DEFINE paths => GETHASH paths http_requests
+	DEFINE headers   => GETHASH headers http_request
+	DEFINE cookies => GETHASH cookies http_request
+	DEFINE body => GETHASH body http_request
 
 #### REPEAT n function
 
@@ -451,7 +451,7 @@ Instead of printing TOK, TOK pushes the TOKEN "PRINTLN" onto the stack.
 
 ##### Description:
 
-While Throff is bootstrapping, TOK is used to quote function names when they are being defined.
+While Throff is bootstrapping, TOK is used to quote names when they are being defined.
 
 	DEFINE TRUE TOK [ EQUAL 1 1 ]
 
