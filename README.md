@@ -813,18 +813,19 @@ Unless you use _SETBYTE_.  Then anything can go wrong.
 
 #### NEWQUEUE -> queue
 
-	Create a new thread-safe FIFO queue
+Create a new thread-safe FIFO queue
 
 #### WRITEQ queue value
 
-	Sends value to queue
+Sends value to queue
 
 #### READQ queue -> value
 
-	Reads a value from queue
+Reads a value from queue
 
 ##### Returns
-		value	- a single element from the queue
+
+value	- a single element from the queue
 
 ### Network
 
@@ -847,26 +848,26 @@ Returns
 
 #### DNS.CNAME hostname
 
-	Lookup cname in the DNS system
+Lookup cname in the DNS system
 
-	Returns
-		string	- canonical DNS name
+Returns
+	string	- canonical DNS name
 		
 
 #### DNS.TXT hostname
 
-	Lookup text records for given hostname in the DNS system
+Lookup text records for given hostname in the DNS system
 
-	Returns
-		array - list of text records
+Returns
+	array - list of text records
 		
 
 #### DNS.REVERSE hostname
 
-	Lookup IP in the DNS system
+Lookup IP in the DNS system
 
-	Returns
-		array	- list of hostnames for given IP address
+Returns
+	array	- list of hostnames for given IP address
 		
 		
 
@@ -910,27 +911,27 @@ Throff IF functions only accept TRUE and FALSE values, as returned by the TRUE a
 
 In order to match the convenience of other, more popular languages, Throff offers the TRUTHY function, which attempts to guess whether any value you give it is TRUE or FALSE.
 
-#### EQUAL x y
+#### EQUAL x y -> boolean
 
 Returns true if the string value of x is equal to the string value of y.
 
 Warning: Don't use EQUAL on WRAPPERs like file handles, network sockets, database handles, etc.  These things usually do not have string representations, so they will all "be equal", when in fact they are different.
 
-#### LESSTHAN x y
+#### LESSTHAN x y -> boolean
 
 Returns true if **x** is less than **y**
 
-#### NOT x
+#### NOT boolean -> boolean
 
-#### AND x y
+#### AND x y -> boolean
 
-#### OR x y
+#### OR x y ->boolean
 
-#### EMPTY? array
+#### EMPTY? array -> boolean
 
 Returns TRUE if **array** has no elements.
 
-#### TRUTHY x
+#### TRUTHY x -> boolean
 
 IF only accepts TRUE or FALSE values, but other languages provide more convenient IF statements that accept any value.  TRUTHY provides this service for THROFF.  Positive numbers are true, zero and negatives are false, and strings with length greater than 0 are true.
 
@@ -940,7 +941,7 @@ Exactly like IF, except it uses TRUTHY to decide whether **value** is TRUE or FA
 	
 ### Advanced control flow
 
-#### CASE array
+#### CASE array -> x
 
 Much neater than multiple if statements, CASE provides a compact way to do multiple tests, in order.
 
@@ -1120,7 +1121,7 @@ ACTOR, PROMISE
 
 Throff supports starting subprocesses (other programs), and the ability to wait for or kill them.  Functions to capture the STDOUT/STDERR coming soon.
 
-#### STARTPROCESS path A[ arg0 arg1 arg2 ... ]A
+#### STARTPROCESS path A[ arg0 arg1 arg2 ... ]A -> processHandle
 
 Start another program at **path**.  The **args** list will be passed to the program as its argument list.  Note that the first element of args will be the $0 arg for the program, which is usually set to the **path** by other languages.  You can set anything you want there, but some programs might rely on it being the path to the program.  You must provide something for the 0th arg, as all programs start reading the arg list from the 1st place.  e.g.
 
@@ -1151,9 +1152,7 @@ Wait for the subprocess **ProcHandle** to finish before continuing.
 
 Runs **command line** in the default shell, and returns the output.
 
-This command works on Mac, Linux and windows, but you get whatever shell is installed, so your commands will not be cross platform.
-
-
+This command works on Mac, Linux and windows, but you get whatever default shell is installed, so your commands will not be cross platform.
 
 #### CMDSTDOUTSTDERR [ executable arg1 arg2 arg3 ...  ] -> Output
 
@@ -1191,7 +1190,7 @@ The function must work like this:
 	FUNC element accumulator
 
 
-#### FOLDTREE
+#### FOLDTREE -> x
 
 As for fold, but works on any data structure.  It recursively visits every element of every subtree until it has called **function** on every element in the tree.
 
