@@ -312,16 +312,11 @@ Inserts hashkeys into the current namespace
 	PRINTLN a
 	WITH [ a b c ] FROM H[ a 1 b 2 c 3 ]H
 
-Loads the requested keys from the hash and puts them in the current environment.  
+Creates variables named in **array**, and fetches their values from **hash**.  It loads the requested keys from the hash and puts them in the current environment.  
 
-Updating the variables will not update the hash nor vice versa.  HASHes, like most other data types, are immutable.
+Updating the variables will not update the hash nor vice versa.  HASHes, like most other data types, are immutable, so any updates create a new data structure and the old values are not changed.
 
-##### Parameters:
-
--	array 	- A list of hash keys that will become variable names
--	hash	- Some data that you want to access as variables
-
-	Example:
+##### Example
 
 	WITH [ ips dates paths ] FROM http_requests
 
@@ -335,9 +330,7 @@ is equivalent to
 
 Calls **function** n times.  
 
-##### Parameters:
-
--	function	- The function must take no arguments and return no values (i.e. it is called for its side effects)
+The function must take no arguments and return no values (i.e. it is called for its side effects)
 
 ##### Example:
 
@@ -379,36 +372,7 @@ Defines a function **name** with body **value**
 
 DEFINE creates a function.  **name** does not need to be quoted, so long as you remember to put the => operator afterwards.  
 
-**value**  must be a function definition (LAMBDA or CODE), and **name** will become a function.  Any time **name** appears in the program, it will automatically activate.  This can cause some nasty bugs, for example:
-
-	DEFINE print_code => [
-		p Code is aFunc ;
-
-		ARG aFunc =>
-	]
-
-if you use print_code on a function, you will get, at best, a crash
-
-	print_code ->FUNC [ ADD ]
-
-	> ERROR: read on empty stack
-
-Instead of printing out ADD, the program crashes because the variable aFunc became a function that tries to add the next two arguments, in this case, the letter ';' and the top of the stack.  To avoid this mishap, you will need to typecast the arguments to your function:
-
-	ARG aFunc => ->LAMBDA
-	
-or
-
-	ARG aFunc => ->STRING
-
-or
-
-	ARG aFunc => ->ARRAY
-
-or you can use GETFUNCTION to safely get the value of aFunc
-
-	p Code is GETFUNCTION aFunc TOK ;
-
+**value**  must be a function definition (LAMBDA or CODE), and **name** will become a function.  
 ##### Returns
 	
 	nothing
@@ -1273,3 +1237,42 @@ Looks up the value of *name* using the current scope.
 
 Creates binding *name* and sets its value to *value*.  Fails if *name* alredy exists.  This is the fundamental way to define functions and variables.  But it lacks any type or error checking, so it is better to use **DEFINE** or **BIND**.
 
+# Known issues
+
+## Handling functions as data
+
+
+Throff considers that everything is a function, even numbers and strings - they are just functions that return themselves.  If you have a function called **name**, then any time **name** appears in the program, it will automatically activate.  This can cause some nasty bugs, for example:
+
+	DEFINE print_code => [
+		p Code is aFunc ;
+
+		ARG aFunc =>
+	]
+
+if you use print_code on a function, you will get, at best, a crash
+
+	print_code ADD
+
+	> ERROR: read on empty stack
+
+Instead of printing out ADD, the program crashes because the variable **aFunc** became a function that tries to add the next two arguments, in this case, the letter ';' and the top of the stack.  
+
+In this example, the problem is obvious.  However if the function is stored in a data structure like an array or hash, then there is no reasonable way to check that a value is a function before it activates.
+
+
+To avoid this mishap, you will need to typecast the arguments to your function, which is verbose and not always appropriate:
+
+	ARG aFunc => ->LAMBDA
+	
+or
+
+	ARG aFunc => ->STRING
+
+or
+
+	ARG aFunc => ->ARRAY
+
+or you can use GETFUNCTION to safely get the value of aFunc
+
+	p Code is GETFUNCTION aFunc TOK ;
