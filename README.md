@@ -539,62 +539,64 @@ CODEs, LAMBDAs and ARRAYs use the same internal data structure, and so can be us
 
 #### FLOOR number -> number
 
-	Discards everything to the right of the decimal point
+Discards everything to the right of the decimal point
 	
 
 #### ADD number number -> number
 
 Adds two numbers
 
-Example
-
 	ADD 2 3
+	5
 
 #### SUB number number -> number
 
 Subtract two numbers
 
-Example
-
 	SUB 5 3
+	2
 
 #### MULT number number -> number
 
 Multiplies two numbers
 
-Example
-
 	MULT 3 4
+	12
 
 #### DIVIDE number number -> number
 
 Divides two numbers
 
-Example
-
 	DIVIDE 10 9
+	1.11111
+	
 
-#### MODULO number number -> number
+#### MODULUS number number -> number
 
-Returns a modulo b
+Returns a modulus b
 
-Example
-
-	MODULO 100000 3
+	MODULUS 100000 3
+	1
 
 #### LN number -> number
 
 Natural logarithm
+
+	LN 7
+	2.807
 	
 #### SIN number -> number
 
 Sine (radiians)
 
+	SIN DIVIDE 3.1415927 3
+	0.8660
+
 ### String functions
 
 #### GETSTRING n astring -> string
 
-Gets the *n*th letter of *astring*.  The returned value is a one letter string, there is no **character** type in Throff.
+Gets the *n*th letter of *astring*.  The returned value is a one letter string, because there is no **character** type in Throff.
 
 #### SETSTRING n letter string -> string2
 
