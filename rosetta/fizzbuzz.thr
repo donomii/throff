@@ -3,8 +3,8 @@ STRING-JOIN A[ , _ ]A MAP [
        WHEN Five BUZZ
        WHEN NOT OR Three Five X
     ]A
-    : Three EQUAL 0 MODULO X 3 
-    : Five EQUAL 0 MODULO X 5  
+    : Three EQUAL 0 MODULUS X 3 
+    : Five EQUAL 0 MODULUS X 5  
     : X  
 ] RANGE 1 200
 
