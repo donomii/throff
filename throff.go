@@ -32,7 +32,7 @@ func main() {
 
 	if len(strs) == 0 {
 		t = t.RunString("PRINTLN [ Welcome to THROFF  v0.1.  Type HELP for help. ]", "repl")
-		t = t.RunString(" [ \nTHROFF v0.1.  Type HELP for help. ]", "repl")
+		//t = t.RunString(" [ \nTHROFF v0.1.  Type HELP for help. ]", "repl")
 		throfflib.Repl(t)
 	} else {
 		throfflib.PrintWarnings = false
