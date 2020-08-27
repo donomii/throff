@@ -1,12 +1,16 @@
 package main
 
-import "github.com/donomii/throfflib"
-
 import (
-	"fmt"
-	//_ "net/http/pprof"
 	"os"
+	"strings"
+
+	"github.com/abadojack/whatlanggo"
+	"github.com/donomii/throfflib"
 )
+
+//_ "net/http/pprof"
+
+var lang = "en"
 
 func main() {
 	go func() {
@@ -16,6 +20,13 @@ func main() {
 	t = throfflib.LoadGraphics(t)
 	//t = throfflib.LoadAudio(t)
 	strs := os.Args[1:]
+	//log.Printf("Evaluating %v\n", strs)
+	for _, arg := range strs {
+		if whatlanggo.Jpn == whatlanggo.Detect(arg).Lang {
+			lang = "jp"
+			//log.Println("Japanese detected")
+		}
+	}
 	//t = t.RunFile("bootstrapgo.lib")
 	t = t.RunString(throfflib.BootStrapString(), "Internal Bootstrap")
 
@@ -23,12 +34,18 @@ func main() {
 		t = t.RunString("PRINTLN [ Welcome to the THROFF REPL v0.1.  Type HELP for help. ]", "repl")
 		throfflib.Repl(t)
 	} else {
+		throfflib.PrintWarnings = false
+		if lang == "jp" {
+			throfflib.BraceMode = "forth"
+			strs = strings.Split(strs[0], "　")
+		}
 
-		fmt.Printf("")
+		t = t.RunString("SPACE", "Command line evaluator") //We print the top of the stack after the calculation.  If the calculation returns nothing, we don't want to print "Stack empty"
+
 		tokens := throfflib.StringsToTokens(strs)
 		t.LoadTokens(tokens)
+
 		t = t.Run()
 		t.RunString("PRINTLN", "replprint")
-
 	}
 }
