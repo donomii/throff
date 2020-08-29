@@ -26,7 +26,7 @@ the Throff programming language
 	Throff »ADD 1 1
 	2
 
-### Run a program in a file
+### Run a program from a file
 
 	throff -f properdiv.thr
 
@@ -41,16 +41,18 @@ the Throff programming language
 
 Throff is a dynamically typed, late binding, homoiconic, concatenative programming language, taking inspiration from Forth, Joy and Scheme.  It has all the features of a modern language - [closures, lexical scopes](http://praeceptamachinae.com/post/throff_variables.html), [tail call optimisations](http://praeceptamachinae.com/post/throff_tail_call_optimisation.html), currying, and continuations.
 
-It supports actors, and everything is a function, even language constructs like IF and FOR, which can be replaced and extended with your own versions.  It uses immutable semantics wherever possible to provide safe and secure threading and continuations.  There is almost no lexer/tokeniser, and no parser in the traditional sense.  Commands are fed directly into the engine to be executed.  The programs are written _backwards_. 
+It has actors, and everything is a function, even language constructs like IF and FOR, which can be replaced and extended with your own versions.  It uses immutable semantics wherever possible to provide safe and secure threading and continuations.  There is almost no lexer/tokeniser, and no parser in the traditional sense.  Commands are fed directly into the engine to be executed.  The programs are written _backwards_. 
 
 Throff is still in development.  The basic language is complete and can be used for minor tasks e.g. text processing.  However some more programmer friendy features are still in development.
 
+There are many examples in the [examples](examples/) and [rosetta](rosetta/) directories.
+
 ## Program flow
 
-Throff programs start at the _bottom_ and are evaluated backwards until they reach the top, where they finish.  Actually, the line breaks are removed and the program becomes one long line, which is evaluated from right-to-left.
+Throff programs start at the _bottom_ and are evaluated backwards until they reach the top, where they finish.  Actually, the line breaks are removed and the program becomes one long expression on a line, which is evaluated from right-to-left.
 
 
-All Throff functions (bar one) operate on the result of code to the right of the function.  A program is one long chain of function calls, each one transforming the output of the function to the right.
+All Throff functions (bar one) operate on the result of code to the right of the function.  A program is one long pipe of function calls, each one transforming the output of the function to the right.
 
     PRINTLN Hello
 
@@ -67,18 +69,19 @@ will call .S before calling ADD.  .S prints the arguments to its right (i.e. the
 ## Goals
 
 * To create a small, simple and portable interpreter (mostly complete)
-* To design a language that builds itself from basic principles to advanced language constructs (going nicely)
+* To design a language that builds itself from very simple primitives into advanced language constructs (going nicely)
 * quick and effective access to platform libraries like graphics, databases, etc (not so good)
 * a simple and highly configurable language (good)
-* the best interactive debugger, with rewind and undo functionality (possible but not implemented well)
+* the best interactive debugger, with rewind and undo functionality (possible but not implemented)
 * Support advanced language features like first-class continuations (mostly complete)
-* a familiar interface available everywhere
-* to minimise the use of explicit typing where possible (while still providing useful typing)
+	+ needs namespaces, monads?
+* a familiar interface available everywhere(good)
+* to minimise the use of explicit typing where possible, while still providing useful typing (nope)
 
 
 ## Throff datatypes
 
-Throff datatypes are still a work in progress, as I come to understand the most effective ways to structure them.  At the moment, there are the following datatypes, with their literal syntax:
+Throff datatypes are still a work in progress, as I come to understand the most effective ways to structure them.  At the moment, these are the datatypes, with their literal syntax:
 
 ### Throff literals
 
@@ -92,17 +95,17 @@ Throff datatypes are still a work in progress, as I come to understand the most 
 * Wrapper -     No literal syntax
 * Bytes -       No literal syntax
 
-Note that under the hood,  arrays, lambdas and codes are almost the same thing, just with different flags to tell the interpreter what to do when it encounters them.
+Note that under the hood,  strings, arrays, lambdas and codes are almost the same thing, just with different flags to tell the interpreter what to do when it encounters them.
 
 ## String Representations
 
-Throff is homoiconic, which in this case also means that all its data structures have explicit string representations.  Every Throff data structure can be used as a string.  So a simple way to compare nested arrays is to compare their string representations:
+Throff is homoiconic, which in this case also means that all its data structures have explicit string representations.  Every Throff data structure can be used as a string.  So a simple, but slow, way to compare nested arrays is to compare their string representations:
 
     EQUAL ->STRING ARRAY1 ->STRING ARRAY2
 
 hashes work in a similar manner.
 
-Native wrappers usually will not work this way, since it is not possible to make a string representation for something like a database handle.  They have a descriptive string that might be meaningful for some things (like filehandles), but usually not.
+Native wrapper types usually will not work this way, since it is not possible to make a string representation for something like a database handle.  They have a descriptive string that might be meaningful sometimes (e.g. for filehandles), but usually not.
 
 ## Symbol Representations
 
@@ -118,21 +121,22 @@ Booleans are created with TRUE, FALSE and EQUAL.  They are only used by the IF f
 
 ### Strings and Tokens
 
-Strings and tokens are treated exactly the same, except when they are being printed out.  This matters when trying to print out a data structure (or code) to be evaluated later.  Throff will print strings exactly as they are, without quotes or escapes.   Throff will try to print tokens as something that will re-create the data structure, including surrounding quotes if needed. Tokens are usually created by the parser, and are used for function names and variable names, while strings are created from TOKENs or directly by reading from a socket or file.
+Strings and tokens are treated exactly the same, except when they are being printed out.  This matters when trying to print out a data structure (or code) to be evaluated later.  Throff will print strings exactly as they are, without quotes or escapes.   For everything else, Throff will try to print some code that will re-create the data structure, including surrounding quotes if needed. The output code might not look like the original code!  Tokens are usually created by the parser, and are used for function names and variable names, while strings are created from TOKENs or directly by reading from a socket or file.
 
 Almost everything in throff has a string representation, and wherever possible,
 throff acts on strings and strings alone.  Every datatype except WRAPPER may be
 coerced into a STRING with ->STRING, or by using a function that expects a string, like
 PRINT or STRING-JOIN.  Numbers are kept as strings, and are converted to numbers at the last moment before use.
 
+WRAPPER types will convert into a string, but the contents might be empty or gibberish.
+
 ### Variable lookup
 
-Variable names in throff are actually tokens.  When throff finds a token, it tries to look it up in the local symbol table to find the value.  If it has a value (if it is a variable), throff replaces the variable name with the value, then continues processing.
+Variable names in throff are tokens.  When throff finds a token, it tries to look it up in the local symbol table to find the value.  If it has a value (if it is a variable), throff replaces the variable name with the value, then continues processing.
 
-Because a variable name is automatically replaced with its value, it is impossible to grab the variable name (the token) itself, which is necessary for writing macros.  Using the _TOK_ function prevents variable lookup and gives you the token to its _left_.
+Because a variable name is automatically replaced with its value, it is impossible to grab the variable name (the token) itself, because it is immediately replaced with its value. However, we need access to the original tokens, because this is necessary for writing macros.  Using the _TOK_ function prevents variable lookup and gives you the token to its _left_.
 
-The TOK command, is the only command in Throff
-that acts on arguments to its _left_.
+The TOK command is the only command in Throff that acts on arguments to its _left_.
 
     Hello! TOK
 
@@ -142,8 +146,7 @@ will force a token containing Hello! onto the datastack.
 
 All numbers are kept as strings right up to the moment they are used in
 a numeric operation, then the native string to number converter is called.  As a
-result, arithmatic will be very slow, right up to the point where I add JIT/PIC,
-and then it will be very fast.
+result, arithmatic is very slow.
 
 If at any point you find yourself wondering "Is this variable a number or a
 string?", the answer is:  it's a string.
@@ -158,7 +161,7 @@ component.
 
 Arrays may be converted to LAMBDAs with ->LAMBDA, and to CODEs with ->CODE.  If you do
 this, the newly formed function will run in the same namespace that it was
-defined in.  You can change the environment it runs in with SETENVIRONMENT.
+created in.  You can change the environment it runs in with SETENVIRONMENT.
 
 ### Lambdas
 
@@ -179,16 +182,16 @@ it is just a function that takes 3 LAMBDA arguments.
 
 LAMBDAs can be converted to arrays
 
-    BIND my_array => ARRAY some_lambda
+    BIND my_array => ->ARRAY some_lambda
 
 LAMBDAs can be converted to strings like this:
 
 
-    BIND my_string => STRING a_lambda
+    BIND my_string => ->STRING a_lambda
     
     or for CODE
     
-    BIND my_string => STRING GETFUNCTION some_function TOK
+    BIND my_string => ->STRING GETFUNCTION some_function TOK
 
 
 ### Code
@@ -209,19 +212,24 @@ will output
 
 This means that any attempt to use functions as arguments to other functions will explode in your face.  For instance
 
-    MAP PRINT [ 1 2 3 4 ]
+    MAP PRINTLN [ 1 2 3 4 ]
 
 will print out
 
     [ 1 2 3 4 ]
 
-instead of 1234.
+instead of 
+
+	MAP [ PRINTLN ] [ 1 2 3 4 ]
+
+	1
+	2
+	3
+	4
 
 
 If you want to pass functions around for higher-order programming, you will need
-LAMBDAs.  CODEs can be converted to LAMBDAs like this:
-
-    BIND my_lambda => LAMBDA GETFUNCTION PRINT TOK
+LAMBDAs.  
 
 but by far the easiest way to do this is to wrap the function
 
@@ -232,8 +240,6 @@ but by far the easiest way to do this is to wrap the function
 This will get the PRINT function and store it in my_lambda
 
 You can call a CODE or a LAMBDA with CALL.
-
-    CALL GETFUNCTION PRINT TOK [ Hello ]
     
     CALL my_lambda
 
@@ -245,6 +251,12 @@ CODEs can be converted to arrays:
 CODEs can be converted to strings:
 
     BIND my_string => STRING GETFUNCTION some_function TOK
+
+CODEs can be converted to LAMBDAs:
+
+    BIND my_lambda => LAMBDA GETFUNCTION PRINT TOK
+
+	CALL GETFUNCTION my_lambda TOK [ Hello ]
 
 ### Hashes
 
@@ -742,12 +754,20 @@ Returns the first element of **array**
 
 #### CDR array -> array
 
-Returns a copy of **array**, with the first element removed
+Returns 
+
+* a copy of **array**, with the first element removed
 
 #### APPEND array1 array2 -> array3
 
-Returns a new array which is array1 with array2 appended to the end.
+Returns a new **array3** which is **array1** with **array2** appended to the end.
 
+	>> APPEND A[ hello ]A A[ world ]A
+	A[ hello world ]A
+
+##### Returns
+
+- A newly allocated array, combining **array1** and **array2**
 
 ### HASHes (dictionaries)
 
@@ -755,45 +775,65 @@ Returns a new array which is array1 with array2 appended to the end.
 
 Create a new hash
 	
-Note: you can use the literal
+Note: you can also use the literal
 
+	H[ ]H
 	H[ key value key value]H
 
-#### HASHSET hash key value -> hash
+##### Returns
 
-	Sets **key** to **value**
+- A new, empty hash
+
+#### HASHSET hashtable key value -> hashtable
+
+Copies **hashtable** and adds an entry for **key** to **value**.  In the future this will use a persistent data structure.  For now, ouch.
+
+	>> HASHSET H[ ]H greetings => [ hello world ]
+	H[ greetings [ hello world ] ]H
 
 ##### Returns
-		hash	- a new hash.  The old hash is unmodified
 
-#### SETHASH key value hash -> hash
+- a new hash.  The old hash is unmodified
 
-Sets **key** to **value**
+#### SETHASH key value hashtable -> hashtable
+
+Copies **hashtable** and adds an entry for **key** to **value**.  In the future this will use a persistent data structure.  Note the argument order is changed.
+
+	>> SETHASH  greetings => [ hello world ]   H[ ]H
+	H[ greetings [ hello world ] ]H
 
 ##### Returns
-	hash	- a new hash.  The old hash is unmodified
+
+- a new hash.  The old hash is unmodified
 
 #### KEYS hash -> array
 
-##### Returns
-	array	- the keys of the hash as an array
-
-#### VALUES hash
+	KEYS H[ greetings [ hello world ] ]H
+	A[ greetings ]A
 
 ##### Returns
-	array	- The values of the hash, as an array
 
-#### KEYVALS hash -> array
+	- array: the keys of the hash as an array
+
+#### VALUES hashtable
+
+Returns the values of hashtable as an array 
+
+	VALUES H[ greetings [ hello world ] ]H
+	A[ [ hello world ] ]A
+
+##### Returns
+
+	- array: The values of the hash, as an array
+
+#### KEYVALS hashtable -> array
 
 ##### Returns
 
 array	- The keys and values "flattened" into an array
 
-Example
-
-	KEYVALS H[ A 1 B 2 C 3 ]H
-
-	-> A[ A 1 B 2 C 3 ]A
+	>> KEYVALS H[ A 1 B 2 C 3 ]H
+	A[ A 1 B 2 C 3 ]A
 
 #### KEYS/VALS -> array, array
 
@@ -803,7 +843,7 @@ Returns
 
 #### HASHDELETE hash key
 
-	Removes *key* from the hash
+Removes *key* from the hash
 
 ### Queues
 
@@ -870,7 +910,6 @@ Returns
 	array	- list of hostnames for given IP address
 		
 		
-
 ### I/O
 
 #### EMIT value
@@ -885,25 +924,25 @@ Prints **value** to STDOUT, followed by a newline.
 
 #### IF [ condition ] [ true ] [ false ]
 
-The **condition** value must be TRUE or FALSE, which are values returned by LESSTHAN, NOT, etc.  See the CONDITIONALS section for more
+The **condition** value must be TRUE or FALSE. TRUE and FALSE are values returned by EQUAL, LESSTHAN, NOT, etc.  See the CONDITIONALS section for more
 
 ##### Example
 	
 	IF [ LESSTHAN X 0 ]
-		[ EMIT [ X is less than 0 ] ]
-		[ EMIT [ X is greater than or equal to 0 ] ]
+		[ PRiNTLN [ X is less than 0 ] ]
+		[ PRINTLN [ X is greater than or equal to 0 ] ]
 		
-or rewriting in more Throffy style:
+but because IF is an expression, we can write
 
-	EMIT   IF  LESSTHAN X 0
-				[ X is less than 0 ]
-				[ X is greater than or equal to 0 ]
-				
-all flow control is based on IF, such as
+	PRINTLN   IF [ LESSTHAN X 0 ]
+				  [ X is less than 0 ]
+				  [ X is greater than or equal to 0 ]			
 
 #### WHEN [ condition ] [ true ]
 
 Just like IF, but only has a true branch
+
+	WHEN TRUE [ PRINTLN [ hello world ] ]
 
 ### Conditionals & logic operations
 
@@ -913,7 +952,7 @@ In order to match the convenience of other, more popular languages, Throff offer
 
 #### EQUAL x y -> boolean
 
-Returns true if the string value of x is equal to the string value of y.
+Returns true if the string value of **x** is equal to the string value of **y**.
 
 Warning: Don't use EQUAL on WRAPPERs like file handles, network sockets, database handles, etc.  These things usually do not have string representations, so they will all "be equal", when in fact they are different.
 
@@ -933,7 +972,7 @@ Returns TRUE if **array** has no elements.
 
 #### TRUTHY x -> boolean
 
-IF only accepts TRUE or FALSE values, but other languages provide more convenient IF statements that accept any value.  TRUTHY provides this service for THROFF.  Positive numbers are true, zero and negatives are false, and strings with length greater than 0 are true.
+IF only accepts TRUE or FALSE values, but other languages have more convenient IF statements that accept any value.  **TRUTHY** provides this service for THROFF.  Positive numbers are true, zero and negatives are false, and strings with length greater than 0 are true.
 
 #### IFFY [ value ] [ true ] [ false ]
 
@@ -943,7 +982,7 @@ Exactly like IF, except it uses TRUTHY to decide whether **value** is TRUE or FA
 
 #### CASE array -> x
 
-Much neater than multiple if statements, CASE provides a compact way to do multiple tests, in order.
+Much neater than multiple IF statements, **CASE** provides a compact way to do multiple tests, in order.
 
 ##### Example
 
@@ -991,17 +1030,15 @@ THROW causes an error condition, which will be caught by the previously declared
 
 THROW does not return
 
-See Also
-
-CATCH
+**See Also** CATCH
 
 #### CALL/CC lambda
 
 Call **lambda** with the Current Continuation.  **lambda** must take one argument
 
-Returns
+##### Returns
 
-- Nothing - CALL/CC never returns
+- Nothing: CALL/CC never returns
 
 #### ACTIVATE/CC continuation value
 
@@ -1009,7 +1046,7 @@ Activate **continuation** with **value**.  Control will jump to the place where 
 
 Returns
 
-- Nothing.  ACTIVATE/CC never returns
+- Nothing:  ACTIVATE/CC never returns
 
 #### PROMISE lambda -> promise
 

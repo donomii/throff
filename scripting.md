@@ -2,7 +2,7 @@
 
 Throff is a useful scripting language for golang.  Like most embedded scripting languages, the challenge is in passing data to throff from golang in a format that it can use.
 
-Passing basic types into throff is easy.  Throff works mainly on strings, and has some limited support for coping with things that aren't strings.  Strings and numbers can passed in directly.  Arrays and hashes can be passed with the use of some helper functions, and everything else gets a lot more difficult.
+Passing basic types into throff is easy.  Throff works mainly on strings, and has some limited support for things that aren't strings.  Strings and numbers can passed in directly.  Arrays and hashes can be passed with the use of some helper functions, and everything else gets a lot more difficult.
 
 First, the easy bits:
 
@@ -56,6 +56,6 @@ One of the more interesting things about throff is that the engine is completely
 
 t does not change.  Throff creates a new engine with the result of the function "ADD", and puts the result in t1.
 
-This means you can "save" the throff engine, and "load" it from the same point over and over.  This is handy for things like webservers, which can load all the libraries they need, then run the same engine over and over to handle web requests.
+This means you can "save" the throff engine, and "load" it from the same point over and over.  This is handy for things like webservers, which can prepare the throff interpreter, then run the same engine over and over to handle web requests.
 
 

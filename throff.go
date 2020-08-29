@@ -18,7 +18,7 @@ func main() {
 		//log.Println(http.ListenAndServe("localhost:6060", nil))
 	}()
 	t := throfflib.MakeEngine()
-	t = throfflib.LoadGraphics(t)
+	//t = throfflib.LoadGraphics(t)  //Add this to throfflib so it can be called from Throff as a word?
 	//t = throfflib.LoadAudio(t)
 	strs := os.Args[1:]
 	log.Printf("Evaluating %v\n", strs)
@@ -34,7 +34,8 @@ func main() {
 	t = t.RunString(throfflib.BootStrapString(), "Internal Bootstrap")
 
 	if len(strs) == 0 {
-		t = t.RunString("PRINTLN [ Welcome to the THROFF REPL v0.1.  Type HELP for help. ]", "repl")
+		t = t.RunString("PRINTLN [ Welcome to THROFF  v0.1.  Type HELP for help. ]", "repl")
+		//t = t.RunString(" [ \nTHROFF v0.1.  Type HELP for help. ]", "repl")
 		throfflib.Repl(t)
 	} else {
 		throfflib.PrintWarnings = false
