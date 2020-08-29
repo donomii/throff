@@ -786,7 +786,7 @@ Note: you can also use the literal
 
 #### HASHSET hashtable key value -> hashtable
 
-	Copies **hashtable** and adds an entry for **key** to **value**.  In the future this will use a persistent data structure.  For now, ouch.
+Copies **hashtable** and adds an entry for **key** to **value**.  In the future this will use a persistent data structure.  For now, ouch.
 
 	>> HASHSET H[ ]H greetings => [ hello world ]
 	H[ greetings [ hello world ] ]H
@@ -797,7 +797,7 @@ Note: you can also use the literal
 
 #### SETHASH key value hashtable -> hashtable
 
-	Copies **hashtable** and adds an entry for **key** to **value**.  In the future this will use a persistent data structure.  Note the argument order is changed.
+Copies **hashtable** and adds an entry for **key** to **value**.  In the future this will use a persistent data structure.  Note the argument order is changed.
 
 	>> SETHASH  greetings => [ hello world ]   H[ ]H
 	H[ greetings [ hello world ] ]H
@@ -815,8 +815,9 @@ Note: you can also use the literal
 
 	- array: the keys of the hash as an array
 
-#### VALUES hash
+#### VALUES hashtable
 
+Returns the values of hashtable as an array 
 
 	VALUES H[ greetings [ hello world ] ]H
 	A[ [ hello world ] ]A
@@ -825,17 +826,14 @@ Note: you can also use the literal
 
 	- array: The values of the hash, as an array
 
-#### KEYVALS hash -> array
+#### KEYVALS hashtable -> array
 
 ##### Returns
 
 array	- The keys and values "flattened" into an array
 
-Example
-
-	KEYVALS H[ A 1 B 2 C 3 ]H
-
-	-> A[ A 1 B 2 C 3 ]A
+	>> KEYVALS H[ A 1 B 2 C 3 ]H
+	A[ A 1 B 2 C 3 ]A
 
 #### KEYS/VALS -> array, array
 
@@ -845,7 +843,7 @@ Returns
 
 #### HASHDELETE hash key
 
-	Removes *key* from the hash
+Removes *key* from the hash
 
 ### Queues
 
@@ -912,7 +910,6 @@ Returns
 	array	- list of hostnames for given IP address
 		
 		
-
 ### I/O
 
 #### EMIT value
@@ -927,25 +924,25 @@ Prints **value** to STDOUT, followed by a newline.
 
 #### IF [ condition ] [ true ] [ false ]
 
-The **condition** value must be TRUE or FALSE, which are values returned by LESSTHAN, NOT, etc.  See the CONDITIONALS section for more
+The **condition** value must be TRUE or FALSE. TRUE and FALSE are values returned by EQUAL, LESSTHAN, NOT, etc.  See the CONDITIONALS section for more
 
 ##### Example
 	
 	IF [ LESSTHAN X 0 ]
-		[ EMIT [ X is less than 0 ] ]
-		[ EMIT [ X is greater than or equal to 0 ] ]
+		[ PRiNTLN [ X is less than 0 ] ]
+		[ PRINTLN [ X is greater than or equal to 0 ] ]
 		
-or rewriting in more Throffy style:
+but because IF is an expression, we can write
 
-	EMIT   IF  LESSTHAN X 0
-				[ X is less than 0 ]
-				[ X is greater than or equal to 0 ]
-				
-all flow control is based on IF, such as
+	PRINTLN   IF [ LESSTHAN X 0 ]
+				  [ X is less than 0 ]
+				  [ X is greater than or equal to 0 ]			
 
 #### WHEN [ condition ] [ true ]
 
 Just like IF, but only has a true branch
+
+	WHEN TRUE [ PRINTLN [ hello world ] ]
 
 ### Conditionals & logic operations
 
@@ -955,7 +952,7 @@ In order to match the convenience of other, more popular languages, Throff offer
 
 #### EQUAL x y -> boolean
 
-Returns true if the string value of x is equal to the string value of y.
+Returns true if the string value of **x** is equal to the string value of **y**.
 
 Warning: Don't use EQUAL on WRAPPERs like file handles, network sockets, database handles, etc.  These things usually do not have string representations, so they will all "be equal", when in fact they are different.
 
@@ -975,7 +972,7 @@ Returns TRUE if **array** has no elements.
 
 #### TRUTHY x -> boolean
 
-IF only accepts TRUE or FALSE values, but other languages provide more convenient IF statements that accept any value.  TRUTHY provides this service for THROFF.  Positive numbers are true, zero and negatives are false, and strings with length greater than 0 are true.
+IF only accepts TRUE or FALSE values, but other languages have more convenient IF statements that accept any value.  **TRUTHY** provides this service for THROFF.  Positive numbers are true, zero and negatives are false, and strings with length greater than 0 are true.
 
 #### IFFY [ value ] [ true ] [ false ]
 
@@ -985,7 +982,7 @@ Exactly like IF, except it uses TRUTHY to decide whether **value** is TRUE or FA
 
 #### CASE array -> x
 
-Much neater than multiple if statements, CASE provides a compact way to do multiple tests, in order.
+Much neater than multiple IF statements, **CASE** provides a compact way to do multiple tests, in order.
 
 ##### Example
 
@@ -1033,17 +1030,15 @@ THROW causes an error condition, which will be caught by the previously declared
 
 THROW does not return
 
-See Also
-
-CATCH
+**See Also** CATCH
 
 #### CALL/CC lambda
 
 Call **lambda** with the Current Continuation.  **lambda** must take one argument
 
-Returns
+##### Returns
 
-- Nothing - CALL/CC never returns
+- Nothing: CALL/CC never returns
 
 #### ACTIVATE/CC continuation value
 
@@ -1051,7 +1046,7 @@ Activate **continuation** with **value**.  Control will jump to the place where 
 
 Returns
 
-- Nothing.  ACTIVATE/CC never returns
+- Nothing:  ACTIVATE/CC never returns
 
 #### PROMISE lambda -> promise
 
