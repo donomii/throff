@@ -754,12 +754,20 @@ Returns the first element of **array**
 
 #### CDR array -> array
 
-Returns a copy of **array**, with the first element removed
+Returns 
+
+* a copy of **array**, with the first element removed
 
 #### APPEND array1 array2 -> array3
 
-Returns a new array which is array1 with array2 appended to the end.
+Returns a new **array3** which is **array1** with **array2** appended to the end.
 
+	>> APPEND A[ hello ]A A[ world ]A
+	A[ hello world ]A
+
+##### Returns
+
+- A newly allocated array, combining **array1** and **array2**
 
 ### HASHes (dictionaries)
 
@@ -767,33 +775,55 @@ Returns a new array which is array1 with array2 appended to the end.
 
 Create a new hash
 	
-Note: you can use the literal
+Note: you can also use the literal
 
+	H[ ]H
 	H[ key value key value]H
 
-#### HASHSET hash key value -> hash
+##### Returns
 
-	Sets **key** to **value**
+- A new, empty hash
+
+#### HASHSET hashtable key value -> hashtable
+
+	Copies **hashtable** and adds an entry for **key** to **value**.  In the future this will use a persistent data structure.  For now, ouch.
+
+	>> HASHSET H[ ]H greetings => [ hello world ]
+	H[ greetings [ hello world ] ]H
 
 ##### Returns
-		hash	- a new hash.  The old hash is unmodified
 
-#### SETHASH key value hash -> hash
+- a new hash.  The old hash is unmodified
 
-Sets **key** to **value**
+#### SETHASH key value hashtable -> hashtable
+
+	Copies **hashtable** and adds an entry for **key** to **value**.  In the future this will use a persistent data structure.  Note the argument order is changed.
+
+	>> SETHASH  greetings => [ hello world ]   H[ ]H
+	H[ greetings [ hello world ] ]H
 
 ##### Returns
-	hash	- a new hash.  The old hash is unmodified
+
+- a new hash.  The old hash is unmodified
 
 #### KEYS hash -> array
 
+	KEYS H[ greetings [ hello world ] ]H
+	A[ greetings ]A
+
 ##### Returns
-	array	- the keys of the hash as an array
+
+	- array: the keys of the hash as an array
 
 #### VALUES hash
 
+
+	VALUES H[ greetings [ hello world ] ]H
+	A[ [ hello world ] ]A
+
 ##### Returns
-	array	- The values of the hash, as an array
+
+	- array: The values of the hash, as an array
 
 #### KEYVALS hash -> array
 
