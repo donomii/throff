@@ -1,12 +1,18 @@
+COMMENT [ An experiment to add a "self" statement to throff 
+that works in a similar fashion to "self" or "this" in OO
+languages.
+
+It works!
+]
+
 COUNT 5
 DEFINE COUNT => [
 	CALL/SELF [
 		WHEN LESSTHAN 0 C [ self SUB1 C ]
 		PRINTLN C
-		ARG  C => ARG  self =>
+		ARG  C => 
 	]
 ]
 
-DEFINE RECURSE =>   [ CALLWITHSELF ]
-DEFINE CALL/SELF => [ CALLWITHSELF ]
-DEFINE CALLWITHSELF => [ CALL f ->FUNC [ CALLWITHSELF f ] ARG f => ]
+DEFINE CALL/SELF => MACRO [ self BIND self => ->FUNC ]
+
