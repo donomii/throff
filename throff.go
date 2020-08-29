@@ -17,7 +17,7 @@ func main() {
 		//log.Println(http.ListenAndServe("localhost:6060", nil))
 	}()
 	t := throfflib.MakeEngine()
-	t = throfflib.LoadGraphics(t)
+	//t = throfflib.LoadGraphics(t)  //Add this to throfflib so it can be called from Throff as a word?
 	//t = throfflib.LoadAudio(t)
 	strs := os.Args[1:]
 	//log.Printf("Evaluating %v\n", strs)
