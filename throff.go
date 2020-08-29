@@ -1,6 +1,7 @@
 package main
 
 import (
+"log"
 	"os"
 	"strings"
 
@@ -20,11 +21,13 @@ func main() {
 	t = throfflib.LoadGraphics(t)
 	//t = throfflib.LoadAudio(t)
 	strs := os.Args[1:]
-	//log.Printf("Evaluating %v\n", strs)
-	for _, arg := range strs {
-		if whatlanggo.Jpn == whatlanggo.Detect(arg).Lang {
-			lang = "jp"
-			//log.Println("Japanese detected")
+	log.Printf("Evaluating %v\n", strs)
+	if len(strs) == 1 {
+		for _, arg := range strs {
+			if whatlanggo.Jpn == whatlanggo.Detect(arg).Lang {
+				lang = "jp"
+				//log.Println("Japanese detected")
+			}
 		}
 	}
 	//t = t.RunFile("bootstrapgo.lib")
