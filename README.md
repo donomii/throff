@@ -41,7 +41,7 @@ the Throff programming language
 
 Throff is a dynamically typed, late binding, homoiconic, concatenative programming language, taking inspiration from Forth, Joy and Scheme.  It has all the features of a modern language - [closures, lexical scopes](http://praeceptamachinae.com/post/throff_variables.html), [tail call optimisations](http://praeceptamachinae.com/post/throff_tail_call_optimisation.html), currying, and continuations.
 
-It has actors, and everything is a function, even language constructs like IF and FOR, which can be replaced and extended with your own versions.  It uses immutable semantics wherever possible to provide safe and secure threading and continuations.  There is almost no lexer/tokeniser, and no parser in the traditional sense.  Commands are fed directly into the engine to be executed.  The programs are written _backwards_. 
+Everything is a function, even language constructs like IF and FOR, which can be replaced and extended with your own versions.  It uses immutable semantics wherever possible to provide safe threading and continuations.  There is almost no lexer/tokeniser, and no parser in the traditional sense.  Commands are fed directly into the engine to be executed.  The programs are written _backwards_. 
 
 Throff is still in development.  The basic language is complete and can be used for minor tasks e.g. text processing.  However some more programmer friendy features are still in development.
 
@@ -52,11 +52,11 @@ There are many examples in the [examples](examples/) and [rosetta](rosetta/) dir
 Throff programs start at the _bottom_ and are evaluated backwards until they reach the top, where they finish.  Actually, the line breaks are removed and the program becomes one long expression on a line, which is evaluated from right-to-left.
 
 
-All Throff functions (bar one) operate on the result of code to the right of the function.  A program is one long pipe of function calls, each one transforming the output of the function to the right.
+All Throff functions (bar one) operate on the result of code to the right of the function.  A program is one long chain of function calls, each one transforming the output of the function to the right.
 
     PRINTLN Hello
 
-evaluates Hello (a string), then PRINTLN (a function).  PRINTLN prints the result of the function to its right, so you can replace Hello with anything, like ADD.
+evaluates Hello (a string), then PRINTLN (a function).  PRINTLN prints the result of the function to its right.
 
     PRINTLN ADD 1 2
 
@@ -72,10 +72,10 @@ will call .S before calling ADD.  .S prints the arguments to its right (i.e. the
 * To design a language that builds itself from very simple primitives into advanced language constructs (going nicely)
 * quick and effective access to platform libraries like graphics, databases, etc (not so good)
 * a simple and highly configurable language (good)
-* the best interactive debugger, with rewind and undo functionality (possible but not implemented)
-* Support advanced language features like first-class continuations (mostly complete)
+* the best interactive debugger, with rewind and undo functionality (bad)
+* Support advanced language features like first-class continuations (good)
 	+ needs namespaces, monads?
-* a familiar interface available everywhere(good)
+* available everywhere(good)
 * to minimise the use of explicit typing where possible, while still providing useful typing (nope)
 
 
@@ -281,15 +281,17 @@ generated code that provides access to lower-level functionality.
 Wrappers usually won't have a string representation.  If a wrapper is used as a
 string, throff will usually attempt to print the code that was used to create the wrapper, or just throw an error.
 
-Since throff uses the string representation of data as a hash key,
+Since throff hashes use the string representation of any key data,
 wrappers should not be used as hash keys, unless you are very sure that the
 string representation exists and is meaningful.
 
 ### Bytes
 
-Bytes are a special type of wrapper, because Throff has some extra in functions for manipulating them.  Throff also provides some basic guarantees for working with bytes.  Throff will not move the bytes, so pointers into the bytes will remain valid.  However, you will need to make sure the bytes are not freed by the garbage collector by keeping a Throff binding to the bytes.
+Bytes are a special type of wrapper, because Throff has some extra in functions for manipulating them.  Throff will not move the bytes, so pointers into the bytes will remain valid.  However, you will need to make sure the bytes are not freed by the garbage collector by keeping a Throff binding to the bytes.
 
 You can convert a throff value to bytes with ->BYTES, or make one with MMAPFILE.  You can get the length (in bytes) with LENGTH, read parts of the BYTES with GETBYTE, or set them with SETBYTE.
+
+Note that the byte operations are not immutable.  Modifying byte data is destructive.
 
 ## Function Reference
 
@@ -309,11 +311,11 @@ will print "1"
 	WHEN true THIN [ REBIND x => 5 ]
 	BIND x => 1
 
-will print "1"
+will print "5"
 
-#### MACRO function
+#### MACRO function -> macro
 
-MACRO converts a function into a MACRO.  MACROs have no lexical environment at all - they use the same environment as the caller (dynamic scope).
+MACRO converts a function into a MACRO.  MACROs are functions with no lexical environment at all - they use the same environment as the caller (dynamic scope).
 
 Macros are heavily used to provide new langauge features in throff.  For instance, the ```WITH array FROM hash``` is implemented with a macro.  For many examples of macro use, look in throffbootstrap.go
 
@@ -334,9 +336,9 @@ Updating the variables will not update the hash nor vice versa.  HASHes, like mo
 
 is equivalent to
 
-	DEFINE headers   => GETHASH headers http_request
+	DEFINE headers => GETHASH headers http_request
 	DEFINE cookies => GETHASH cookies http_request
-	DEFINE body => GETHASH body http_request
+	DEFINE body    => GETHASH body http_request
 
 #### REPEAT n function
 
@@ -350,13 +352,27 @@ The function must take no arguments and return no values (i.e. it is called for 
 
 ##### See Also:
 
-	MAP, FOLD, RANGE
+	FOREVER
+	
+#### FOREVER function
+
+Calls **function** forever.  
+
+The function must take no arguments and return no values (i.e. it is called for its side effects)
+
+##### Example:
+
+	FOREVER [ p Hello World ; ]
+
+##### See Also:
+
+	REPEAT
 
 #### THREAD function
 
 Starts a new thread to run **function**.  A clone of the current interpreter is used for the the new thread.  Due to Throff's immutable semantics, the new thread will not be able to update values in the old thread.  However this protection does not work for anything external to the interpreter, like sockets, files or databases.  If both the old and new threads attempt to write to the same file handle, or read from the same network socket, corruption will occur.
 
-Threads cannot communicate directly with each other, you need to use something like a QUEUE, or a third party library.
+Threads cannot communicate directly with each other, you need to use something like a QUEUE.
 
 The ACTOR functions provide a convenient way to run a thread and communicate with other threads.
 
@@ -374,6 +390,7 @@ The ACTOR functions provide a convenient way to run a thread and communicate wit
 
 Defines a function **name** with body **value**
 
+Note that the => is part of the syntax
 
 ##### Parameters:
 
@@ -398,6 +415,8 @@ DEFINE creates a function.  **name** does not need to be quoted, so long as you 
 
 ARG binds a function argument to **name**.  It is currently an alias to BIND.
 
+Note that the => is part of the syntax
+
 ##### Example:
 
 	DEFINE greet => [
@@ -415,6 +434,8 @@ See Also:
 	DEFINE, BIND, REBIND
 
 #### BIND name => value
+
+Note that the => is part of the syntax
 
 Variables are created with the BIND command.
 
@@ -662,11 +683,11 @@ You can get the current environment with
 
 Bytes provide direct memory access.  Unlike everything else in Throff, they are mutable by default.  They are also a good way to to corrupt memory and cause throff to crash.
 
-#### ->BYTES
+#### ->BYTES anything -> bytes
 
-Converts any throff data into a BYTES.  If the input is a WRAPPER, then it will be used unchanged (and without being copied into a new memory location, which is what the other type converters do).  Any data other than WRAPPERs will be converted to a STRING, and then that STRING will be used as BYTES.
+Converts any throff data into a BYTES.  If the input is a WRAPPER, then it will be used unchanged (and without being copied into a new memory location, which is what the other type converters should do).  Any data other than WRAPPERs will be converted to a STRING, and then that STRING will be used as BYTES.
 
-#### GETBYTE position bytes
+#### GETBYTE position bytes -> value
 
 Gets the byte at **position** from **bytes**.
 
@@ -692,7 +713,7 @@ FIXME implement this
 
 ### Array functions
 
-#### NEWARRAY
+#### NEWARRAY -> array
 
 Create an empty new array
 	
@@ -700,7 +721,7 @@ Note: You can also use the literal
 
 	A[ ]A
 
-#### ARRAYPUSH array item
+#### ARRAYPUSH array1 item -> array2
 
 Pushes item onto the end of array.  Returns the new array
 
@@ -708,7 +729,7 @@ Example
 
 	REBIND myArray => ARRAYPUSH myArray [ hello ]
 
-#### POPARRAY array
+#### POPARRAY array1 -> array2
 
 Pops an item off the end of the array
 
@@ -752,11 +773,15 @@ Returns true if **array** has no elements.
 
 Returns the first element of **array**
 
-#### CDR array -> array
+FIXME: use this only for lists
+
+#### CDR array1 -> array2
+
+FIXME: use this only for lists
 
 Returns 
 
-* a copy of **array**, with the first element removed
+* a copy of **array1**, with the first element removed
 
 #### APPEND array1 array2 -> array3
 
@@ -771,7 +796,7 @@ Returns a new **array3** which is **array1** with **array2** appended to the end
 
 ### HASHes (dictionaries)
 
-#### NEWHASH
+#### NEWHASH -> hashtable
 
 Create a new hash
 	
@@ -784,7 +809,7 @@ Note: you can also use the literal
 
 - A new, empty hash
 
-#### HASHSET hashtable key value -> hashtable
+#### HASHSET hashtable key value -> [ new hashtable ]
 
 Copies **hashtable** and adds an entry for **key** to **value**.  In the future this will use a persistent data structure.  For now, ouch.
 
@@ -795,7 +820,7 @@ Copies **hashtable** and adds an entry for **key** to **value**.  In the future 
 
 - a new hash.  The old hash is unmodified
 
-#### SETHASH key value hashtable -> hashtable
+#### SETHASH key value hashtable -> [ new hashtable ]
 
 Copies **hashtable** and adds an entry for **key** to **value**.  In the future this will use a persistent data structure.  Note the argument order is changed.
 
@@ -806,7 +831,7 @@ Copies **hashtable** and adds an entry for **key** to **value**.  In the future 
 
 - a new hash.  The old hash is unmodified
 
-#### KEYS hash -> array
+#### KEYS hash -> [ array of keys ]
 
 	KEYS H[ greetings [ hello world ] ]H
 	A[ greetings ]A
@@ -815,7 +840,7 @@ Copies **hashtable** and adds an entry for **key** to **value**.  In the future 
 
 	- array: the keys of the hash as an array
 
-#### VALUES hashtable
+#### VALUES hashtable -> [ array of values ]
 
 Returns the values of hashtable as an array 
 
@@ -841,7 +866,7 @@ Returns
 	array	KEYS hash
 	array	VALUES hash
 
-#### HASHDELETE hash key
+#### HASHDELETE hash key -> [ new hash ]
 
 Removes *key* from the hash
 
@@ -878,7 +903,7 @@ Returns
 	string	- webpage
 		
 
-#### DNS.HOST hostname
+#### DNS.HOST hostname -> [ array of IP addresses ]
 
 Lookup hostname in the DNS system
 
@@ -886,7 +911,7 @@ Returns
 	array	- IP addresses
 		
 
-#### DNS.CNAME hostname
+#### DNS.CNAME hostname -> [ cannonical name ]
 
 Lookup cname in the DNS system
 
@@ -894,7 +919,7 @@ Returns
 	string	- canonical DNS name
 		
 
-#### DNS.TXT hostname
+#### DNS.TXT hostname -> [ array of records ]
 
 Lookup text records for given hostname in the DNS system
 
@@ -902,7 +927,7 @@ Returns
 	array - list of text records
 		
 
-#### DNS.REVERSE hostname
+#### DNS.REVERSE hostname -> IP
 
 Lookup IP in the DNS system
 
@@ -1212,7 +1237,7 @@ Map is the usual as found in functional languages - it calls function on each el
 
 Use **ITERATE** if you do not plan to use the results, it consumes less memory.
 
-#### FOLD function start array -> a value
+#### FOLD function start array -> value
 
 Fold works like map, it applies a function to every element of the array.  But instead of building a new array, FOLD passes the result of your function as input to the next step.
 
@@ -1224,16 +1249,38 @@ Here FOLD will multiply start by the first element of your array, then takes the
 
 The function must work like this:  
 
-	FUNC element accumulator
+	FUNC element accumulator -》 value
 
 
-#### FOLDTREE -> x
+#### FOLDTREE function start tree -> value
 
 As for fold, but works on any data structure.  It recursively visits every element of every subtree until it has called **function** on every element in the tree.
 
-#### TREEWALK
+ **function**
 
-Calls **function** on every leaf of the tree in turn
+The function must work like this:  
+
+	FUNC element accumulator -》 value
+
+#### MAPTREE function tree -> transformed_tree
+
+As for MAP, but works on any data structure.  It recursively visits every element of every subtree until it has called **function** on every element in the tree.
+
+ **function**
+
+The function must work like this:  
+
+	FUNC element -》 value
+
+#### TREEWALK function tree
+
+As for ITERATE, but works on any data structure.  It recursively visits every element of every subtree until it has called **function** on every element in the tree.
+
+ **function**
+
+The function must work like this:  
+
+	FUNC element
 
 ### NAMESPACES and SCOPES
 
@@ -1241,23 +1288,23 @@ Namespaces and scopes are still a bit wobbly in Throff, but are at the point whe
 
 Manipulating them directly is usually safe, because they are _immutable_.  Or _mostly_ immutable.
 
-Scopes are throff hashes, and if you can get a reference to them, you can use ordinary throff hash functions on them.
-
 Scopes are all nested, with the root scope being the initial scope that the program starts with.  Variables can be looked up with GETLEX, which will search every scope from the current up to the root.
 
-The current scope is mutable but all other scopes (especially parent) are immutable, although it is not hard to find a way to modify the memory of another scope.  Doing this will not work the way you want it to, since scopes are often copied or optimised away.
+The current scope is mutable but all other scopes (especially parent) are immutable, although it is possible to find a way to modify the memory of another scope.  Doing this will not work the way you want it to, since scopes are often copied or optimised away.
 
-Almost every [ ] introduces a new scope (MACRO and THIN functions are exceptions).  This means you can't update variables inside a MAP or FOLD or FOR loop, because all the variables inside the [ ] are discarded.
+Almost every [ ] introduces a new scope (MACRO and THIN functions are exceptions).  This means you can't update variables inside a MAP or FOLD or FOR loop, because all the variables inside the [ ] are discarded when you leave the [ ].
 
-BIND creates a new variable in the current scope, and fails if the variable already exists.  REBIND either replaces a BIND, or shadows a variable in the parent scope.  Throff will throw an error if you attempt to bind a variable name that is already bound in a parent scope.
+BIND creates a new variable in the current scope, and fails if the variable already exists.  REBIND shadows previous bind, usually a variable in the parent scope.  Note that REBINDing a variable can only update the value for future code.  Every REBINDing is actually a completey new variable definition.  And so it can't be seen by any code that has already been definined.
+
+Throff will throw an error if you attempt to bind a variable name that is already bound in a parent scope.
 
 #### Scoping rules
 
 There are two special types of scoping rules:  THIN and MACRO.
 
-MACROs have no scope when they are defined, they temporarily gain one when they are run, enabling them to create and destroy variables in other scopes.  MACROs are heavily used to implement language features, and should also be quite fast (since we don't have to create a scope when they run).
+MACROs have no scope and no environment when they are defined, instead they temporarily use the environment where they are executed, enabling them to create and destroy variables in other scopes.  MACROs are heavily used to implement language features, and should also be quite fast (since we don't have to create a scope when they run).
 
-THIN functions are probably a bad idea.  THIN functions use their parent scope, and not their own, when they run.  This does allow you to update variables from inside a FOR loop, but it is a very bad idea in general, since, among other things, it prevents any optimisation of that scope.
+THIN functions are probably a bad idea.  THIN functions use their parent scope, and not their own, when they run.  This does allow you to update variables from inside a FOR loop, but note that the usual rules apply.  The updated bindings are only visible to future code.
 
 #### SETLEX name value
 
@@ -1280,7 +1327,7 @@ Creates binding *name* and sets its value to *value*.  Fails if *name* alredy ex
 ## Handling functions as data
 
 
-Throff considers that everything is a function, even numbers and strings - they are just functions that return themselves.  If you have a function called **name**, then any time **name** appears in the program, it will automatically activate.  This can cause some nasty bugs, for example:
+Throff thinks that everything is a function, even numbers and strings - they are just functions that return themselves.  If you have a function called **name**, then any time **name** appears in the program, it will automatically activate.  This can cause some nasty bugs, for example:
 
 	DEFINE print_code => [
 		p Code is aFunc ;
