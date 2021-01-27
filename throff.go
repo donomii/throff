@@ -23,6 +23,11 @@ func main() {
 	strs := os.Args[1:]
 	//log.Printf("Evaluating %v\n", strs)
 	if len(strs) == 1 {
+		if strs[0] == "--shell" {
+			t = t.RunString(throfflib.BootStrapString(), "Internal Bootstrap")
+			//t.RunString(" PRINTLN [ Welcome to Throff Shell　v0.1 ] PRINTLN NEWLINE ", "repl")
+			throfflib.Shell(t, lang == "en")
+		}
 		for _, arg := range strs {
 			if whatlanggo.Jpn == whatlanggo.Detect(arg).Lang {
 				lang = "jp"
