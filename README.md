@@ -107,11 +107,11 @@ hashes work in a similar manner.
 
 Native wrapper types usually will not work this way, since it is not possible to make a string representation for something like a database handle.  They have a descriptive string that might be meaningful sometimes (e.g. for filehandles), but usually not.
 
-## Symbol Representations
+## Tokens
 
-Symbol representation is used for manipulating source code.  Requesting symbol output of data returns the commands needed to recreate the data, rather than their string representation.  Symbol output is most useful for EVAL, and can be used to send program code over network sockets.
+Tokens used for manipulating source code.  Printing a token returns the commands needed to recreate the token, rather than the string representation.  Tokens are most useful for EVAL, and can be used to send program code over network sockets.
 
-FIXME rename "symbol representation" to something less confusing.
+Internally, tokens are just strings, but they are printed differently.
 
 ## The Datatypes in Detail
 
@@ -121,7 +121,7 @@ Booleans are created with TRUE, FALSE and EQUAL.  They are only used by the IF f
 
 ### Strings and Tokens
 
-Strings and tokens are treated exactly the same, except when they are being printed out.  This matters when trying to print out a data structure (or code) to be evaluated later.  Throff will print strings exactly as they are, without quotes or escapes.   For everything else, Throff will try to print some code that will re-create the data structure, including surrounding quotes if needed. The output code might not look like the original code!  Tokens are usually created by the parser, and are used for function names and variable names, while strings are created from TOKENs or directly by reading from a socket or file.
+Strings and tokens are treated exactly the same, except when they are being printed out.  This matters when trying to print out a data structure (or code) to be evaluated later.  Throff will print strings exactly as they are.   For everything else, Throff will try to print some code that will re-create the data structure, including surrounding quotes if needed. The output code might not look like the original code!  Tokens are usually created by the parser, and are used for function names and variable names, while strings are created from TOKENs or directly by reading from a socket or file.
 
 Almost everything in throff has a string representation, and wherever possible,
 throff acts on strings and strings alone.  Every datatype except WRAPPER may be
@@ -184,7 +184,7 @@ LAMBDAs can be converted to arrays
 
     BIND my_array => ->ARRAY some_lambda
 
-LAMBDAs can be converted to strings like this:
+LAMBDAs can be converted to strings
 
 
     BIND my_string => ->STRING a_lambda
@@ -196,11 +196,17 @@ LAMBDAs can be converted to strings like this:
 
 ### Code
 
-Functions are kept as native arrays, and are created with 
+Functions are created with 
 
+
+    DEFINE sayhello => [ PRINTLN HELLO ]
+    
+They can be created directly with
+    
     FUNC [ ]
 
-Throff keeps track of executable code by marking the data itself, not the variable.  Because CODE is a datatype, any variable holding a a CODE immediately becomes a function, like this:
+
+Throff keeps track of executable code by marking the data as executable, not the variable.  Because CODE is an executable datatype, any variable holding CODE immediately becomes a function, like this:
 
     a
     BIND a => GETFUNCTION say_hello TOK
@@ -231,13 +237,11 @@ instead of
 If you want to pass functions around for higher-order programming, you will need
 LAMBDAs.  
 
-but by far the easiest way to do this is to wrap the function
+The easy way to do this is to wrap the function
 
     MAP my_lambda [ 1 2 3 4 ]
     BIND my_lambda = [ PRINT ]
     
-
-This will get the PRINT function and store it in my_lambda
 
 You can call a CODE or a LAMBDA with CALL.
     
@@ -267,10 +271,9 @@ You can get a list of the keys with KEYS.
 
 The string representation of a throff hash is generated on the fly and not
 stored.  The string representing the hash will be a series of throff commands
-that will rebuild the hash when EVALed.  Key order is not guaranteed unless the
-underlying implementation provides for it.
+that will rebuild the hash when EVALed.  Key order is not guaranteed.
 
-Handling nested hashes is currently too difficult, I will be redesigning this soon.
+Handling nested hashes is currently too difficult, I will be redesigning this.
 
 ### Wrappers
 
@@ -281,17 +284,17 @@ generated code that provides access to lower-level functionality.
 Wrappers usually won't have a string representation.  If a wrapper is used as a
 string, throff will usually attempt to print the code that was used to create the wrapper, or just throw an error.
 
-Since throff hashes use the string representation of any key data,
+Since throff hashes use the string representation of the key,
 wrappers should not be used as hash keys, unless you are very sure that the
 string representation exists and is meaningful.
 
 ### Bytes
 
-Bytes are a special type of wrapper, because Throff has some extra in functions for manipulating them.  Throff will not move the bytes, so pointers into the bytes will remain valid.  However, you will need to make sure the bytes are not freed by the garbage collector by keeping a Throff binding to the bytes.
+Bytes are a special type of wrapper, because Throff has some extra in functions for manipulating them.  Throff will not move the bytes in memory, so pointers into the bytes will remain valid.  However, you will need to make sure the bytes are not freed by the garbage collector by keeping a Throff binding to the bytes.
 
-You can convert a throff value to bytes with ->BYTES, or make one with MMAPFILE.  You can get the length (in bytes) with LENGTH, read parts of the BYTES with GETBYTE, or set them with SETBYTE.
+You can convert a throff value to bytes with ->BYTES, or map a file with MMAPFILE.  You can get the length (in bytes) with LENGTH, read parts of the BYTES with GETBYTE, or set them with SETBYTE.
 
-Note that the byte operations are not immutable.  Modifying byte data is destructive.
+Note that the byte operations are not immutable.  Modifying byte data is destructive.  Most other Throff functions will make a copy of data before modifying it.
 
 ## Function Reference
 
