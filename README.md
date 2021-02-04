@@ -359,7 +359,7 @@ The function must take no arguments and return no values (i.e. it is called for 
 	
 #### FOREVER function
 
-Calls **function** forever.  
+Calls **function** inan infinite loop.  
 
 The function must take no arguments and return no values (i.e. it is called for its side effects)
 
