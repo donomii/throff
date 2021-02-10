@@ -1,9 +1,13 @@
-COMMENT [ Call with current continuation 
+COMMENT [ 
+
+Call with current continuation 
 
 An example demonstrating how I could add return statements to functions 
 
 ]
 
+PRINTLN [ Quit early! ]
+PRINTLN [ ]
 CALL/CC [
   FOR 1 TO 100 [
 	EMIT A[ , => SPACE ]A
@@ -11,12 +15,13 @@ CALL/CC [
 	EMIT DUP
   ]
   makeReturn
-  ]
+]
+
   
+  DEFINE TO => [ ]
  
- DEFINE TO => [ ]
  DEFINE makeReturn => MACRO [
  
-  DEFINE return => [ ACTIVATE/CC EC [ ] ]
+  DEFINE break => [ ACTIVATE/CC EC [ ] ]
   ARG EC =>
  ]

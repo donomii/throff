@@ -18,10 +18,7 @@ func main() {
 		//log.Println(http.ListenAndServe("localhost:6060", nil))
 	}()
 	t := throfflib.MakeEngine()
-	//t = throfflib.LoadGraphics(t)  //Add this to throfflib so it can be called from Throff as a word?
-	//t = throfflib.LoadAudio(t)
 	strs := os.Args[1:]
-	//log.Printf("Evaluating %v\n", strs)
 	if len(strs) == 1 {
 		if strs[0] == "--shell" {
 			t = t.RunString(throfflib.BootStrapString(), "Internal Bootstrap")
@@ -39,14 +36,12 @@ func main() {
 	t = t.RunString(throfflib.BootStrapString(), "Internal Bootstrap")
 
 	if len(strs) == 0 {
-		//log.Printf("progname %v", os.Args[0])
 		if strings.Contains(os.Args[0], "小日本語") {
 			lang = "jp"
 			t = t.RunString("PRINTLN [ 小日本語　0.1.  使い方ヘップを入力しなさい ] PRINTLN NEWLINE ", "repl")
 		} else {
 			t = t.RunString("PRINTLN [ Welcome to Throff　v0.1.  Type HELP for help. ] PRINTLN NEWLINE ", "repl")
 		}
-		//t = t.RunString(" [ \nTHROFF v0.1.  Type HELP for help. ]", "repl")
 		throfflib.Repl(t, lang == "jp")
 	} else {
 		throfflib.PrintWarnings = false
