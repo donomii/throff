@@ -3,6 +3,6 @@
 			: X ADD1 
 		] REVERSE IOTA 100
 
-DEFINE plural => func [ word number ] [
+DEFINE plural => [ word number ] [
 IF EQUAL number 1 [ word ] [ STRING-CONCATENATE word s ]
 ]
