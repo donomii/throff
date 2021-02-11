@@ -1,0 +1,95 @@
+COMMENT [ 
+
+Demonstrate defining a function using a traditional parameters declaration
+
+]
+
+[ ]
+
+NAMETESTBLOCK [ power function ] [
+TEST 8 pow  2 3  [ 2^3 ]
+TEST 4 pow  2 2  [ 2^2 ]
+TEST 2 pow  2 1  [ 2^1 ]
+TEST 1 pow  2 0  [ 2^0 ]
+]
+
+PRINTLN pow  2 2 
+
+func pow => [ base exponent ] [
+    FOLD [ MULT base DROP ] 1 RANGE 1 exponent
+]
+
+
+NAMETESTBLOCK [ Testing func definition ] [
+
+	TEST 0 t_add [ ] [ Add empty list ]
+
+	TEST 25 t_add [ 3 4 5 6 7 ] [ Add many numbers ]
+
+	TEST 6  tf  [ 1 2 3 ] [ Test function with automatic args ]
+
+	DEFINE t_add => varfunc [ ] [ FOLD [ ADD ] 0 params ]
+
+	func tf => [ a b c ] [  ADD a ADD b c ]
+    countDown A[ 5 ]A
+    func countDown => [ count ] [ WHEN LESSTHAN 0 count [ countDown A[ SUB1 count ]A PRINTLN A[ [ coundown: ]  count ]A ]  ]
+]
+
+DEFINE varfunc => [
+
+		LAMBDA [
+			CALL newF
+
+
+			BIND newF => SETENV f newEnv
+			BIND newEnv => SETHASH params TOK params env
+
+		ARG params => ]
+
+	BIND env => ENVIRONMENTOF f
+
+ARG f => ARG args => ]
+
+
+say [ Hello ]
+
+func say => [ text ] [ PRINTLN text ]
+
+PRINTLN GETFUNCTION func =>
+
+DEFINE func =>  MACRO [
+	 DEFINE CALL LAMBDA [ 
+	 name
+	 LAMBDA [
+
+		CALL 	
+		SETENV f ENVIRONMENTOF here TOK
+		COMMENT [ PRINTLN A[ Calling f with arguments args length LENGTH args ]A ]
+	 	WITA params FROM args
+		BIND args => STACKTAKE A[ ]A paramsLength
+		]
+
+	COMMENT [ PRINTLN A[ Defining =>  name with parameters params length paramsLength ]A ]
+	BIND paramsLength => LENGTH params
+	ARG f => ARG params => ->ARRAY ARG name => ->STRING ] 
+	
+]
+
+	PRINTLN [ Defining func ]
+
+DEFINE FROM => [ FROM TOK ]
+STACKTAKE  A[ ]A  3  1 2 3
+: STACKTAKE => ->CODE [
+
+	IF LESSTHAN count 1 
+		[ accum ]
+		[ 
+			STACKTAKE  accum1  SUB1 count
+			ARG accum1 => ARRAYPUSH accum
+		]
+
+
+	ARG count =>
+	ARG accum =>
+]
+
